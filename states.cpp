@@ -1,7 +1,7 @@
 #include "states.hpp"
 #include "global.hpp"
 #include <cctype>
-#include <set>
+#include <map>
 #include <SDL/SDL_image.h>
 
 #define SPRITE_SIZE		(40)
@@ -125,24 +125,35 @@ void GameState::processInput()
 					} break;
 					case SDLK_RETURN:
 					{
-						std::set<char> chars;
+						std::map<char, int> chars;
 						for (int i = 0; i < WORD_SIZE; ++i)
 						{
 							if (word_to_guess[i] == letters[wrong_guesses][i])
 								bts[wrong_guesses][i] = BT_LETTER_POSITION_OK;
 							else
-								chars.insert(word_to_guess[i]);
+							{
+								++chars[word_to_guess[i]];
+							}
 						}
 						for (int i = 0; i < WORD_SIZE; ++i)
 						{
-							if (chars.count(letters[wrong_guesses][i]) != 0 && bts[wrong_guesses][i] != BT_LETTER_POSITION_OK)
+							if (chars[letters[wrong_guesses][i]] > 0 && bts[wrong_guesses][i] != BT_LETTER_POSITION_OK)
 							{
 								bts[wrong_guesses][i] = BT_LETTER_OK;
+								--chars[letters[wrong_guesses][i]];
 							}
 						}
 						++wrong_guesses;
 						active_letter = 0;
 						leave = true;
+					} break;
+					case SDLK_RSHIFT:
+					{
+						if (wrong_guesses > 0)
+						{
+							letters[wrong_guesses][active_letter] = letters[wrong_guesses - 1][active_letter];
+							leave = true;
+						}
 					} break;
 					case SDLK_ESCAPE:
 					{

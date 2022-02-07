@@ -38,7 +38,7 @@ private:
 	BoxType bts[MAX_WRONG_GUESSES][WORD_SIZE];
 	int wrong_guesses = 0;
 	int active_letter = 0;
-	std::string word_to_guess = "ELDER";
+	std::string word_to_guess = "SKILL";
 
 	void drawLetter(int x, int y, char c);
 	void drawBox(int x, int y, BoxType bt);
