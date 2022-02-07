@@ -1,5 +1,9 @@
 #include "states.hpp"
 #include "global.hpp"
+#include <fstream>
+#include <iostream>
+#include <algorithm>
+#include <iterator>
 #include <cctype>
 #include <map>
 #include <SDL/SDL_image.h>
@@ -12,7 +16,6 @@ MenuState menustate;
 
 void GameState::drawLetter(int x, int y, char c)
 {
-	c = toupper(c);
 	if (c < 'A' || c > 'Z')
 		return;
 	SDL_Rect src, dst;
@@ -51,6 +54,23 @@ void GameState::unloadGfx()
 	gfx = nullptr;
 }
 
+void GameState::loadDictionary()
+{
+	std::ifstream in("5.txt");
+	std::string word;
+	while (in.good())
+	{
+		in >> word;
+		if (word.size() != WORD_SIZE)
+		{
+			std::cerr << "Dictionary error: " << word << std::endl;
+			continue;
+		}
+		std::transform(word.begin(), word.end(), word.begin(), toupper);
+		dict.insert(word);
+	}
+}
+
 void GameState::resetGame()
 {
 	for (int j = 0; j < MAX_WRONG_GUESSES; ++j)
@@ -59,6 +79,13 @@ void GameState::resetGame()
 			letters[j][i] = ' ';
 			bts[j][i] = BT_WRONG;
 		}
+
+	// choose a random word
+	int steps = rand() % dict.size();
+	auto it = dict.begin();
+	std::advance(it, steps);
+	word_to_guess = *it;
+	std::cout << "Word to guess: " << word_to_guess << std::endl;
 }
 
 void GameState::draw()
@@ -78,6 +105,68 @@ void GameState::draw()
 	SDL_Flip(screen);
 }
 
+void GameState::verifyInputWord()
+{
+	// check if in the dictionary
+	std::string word = "";
+	for (int i = 0; i < WORD_SIZE; ++i)
+	{
+		word += letters[wrong_guesses][i];
+	}
+	if (dict.count(word) == 0)
+	{
+		for (int i = 0; i < WORD_SIZE; ++i)
+		{
+			letters[wrong_guesses][i] = ' ';
+		}
+		active_letter = 0;
+		std::cout << "The given word is not in the dictionary." << std::endl;
+	}
+	else
+	{
+		// search for green guesses
+		int correct_letters = 0;
+		std::map<char, int> chars;
+		for (int i = 0; i < WORD_SIZE; ++i)
+		{
+			if (word_to_guess[i] == letters[wrong_guesses][i])
+			{
+				bts[wrong_guesses][i] = BT_LETTER_POSITION_OK;
+				++correct_letters;
+			}
+			else
+			{
+				++chars[word_to_guess[i]];
+			}
+		}
+		if (WORD_SIZE == correct_letters)
+		{
+			wrong_guesses = MAX_WRONG_GUESSES; // do not display the red box
+			std::cout << "You won." << std::endl;
+			gamestatus = GS_WON;
+		}
+		else
+		{
+			// search for yellow guesses
+			for (int i = 0; i < WORD_SIZE; ++i)
+			{
+				if (chars[letters[wrong_guesses][i]] > 0 && bts[wrong_guesses][i] != BT_LETTER_POSITION_OK)
+				{
+					bts[wrong_guesses][i] = BT_LETTER_OK;
+					--chars[letters[wrong_guesses][i]];
+				}
+			}
+			++wrong_guesses;
+			if (MAX_WRONG_GUESSES == wrong_guesses)
+			{
+				std::cout << "You lost." << std::endl;
+				gamestatus = GS_LOST;
+			}
+			active_letter = 0;
+		}
+	}
+}
+
 void GameState::processInput()
 {
 	SDL_Event event;
@@ -91,68 +180,67 @@ void GameState::processInput()
 				{
 					case SDLK_LEFT:
 					{
-						if (active_letter > 0)
+						if (GS_INPROGRESS == gamestatus)
 						{
-							--active_letter;
-							leave = true;
+							if (active_letter > 0)
+							{
+								--active_letter;
+								leave = true;
+							}
 						}
 					} break;
 					case SDLK_RIGHT:
 					{
-						if (active_letter < (WORD_SIZE - 1))
+						if (GS_INPROGRESS == gamestatus)
 						{
-							++active_letter;
-							leave = true;
+							if (active_letter < (WORD_SIZE - 1))
+							{
+								++active_letter;
+								leave = true;
+							}
 						}
 					} break;
 					case SDLK_UP:
 					{
-						char &letter = letters[wrong_guesses][active_letter];
-						if (letter < 'A' || letter > 'Z')
-							letter = 'Z';
-						else
-							--letter;
-						leave = true;
+						if (GS_INPROGRESS == gamestatus)
+						{
+							char &letter = letters[wrong_guesses][active_letter];
+							if (letter < 'A' || letter > 'Z')
+								letter = 'Z';
+							else
+								--letter;
+							leave = true;
+						}
 					} break;
 					case SDLK_DOWN:
 					{
-						char &letter = letters[wrong_guesses][active_letter];
-						if (letter < 'A' || letter > 'Z')
-							letter = 'A';
-						else
-							++letter;
-						leave = true;
+						if (GS_INPROGRESS == gamestatus)
+						{
+							char &letter = letters[wrong_guesses][active_letter];
+							if (letter < 'A' || letter > 'Z')
+								letter = 'A';
+							else
+								++letter;
+							leave = true;
+						}
 					} break;
 					case SDLK_RETURN:
 					{
-						std::map<char, int> chars;
-						for (int i = 0; i < WORD_SIZE; ++i)
+						if (GS_INPROGRESS == gamestatus)
 						{
-							if (word_to_guess[i] == letters[wrong_guesses][i])
-								bts[wrong_guesses][i] = BT_LETTER_POSITION_OK;
-							else
-							{
-								++chars[word_to_guess[i]];
-							}
+							verifyInputWord();
 						}
-						for (int i = 0; i < WORD_SIZE; ++i)
-						{
-							if (chars[letters[wrong_guesses][i]] > 0 && bts[wrong_guesses][i] != BT_LETTER_POSITION_OK)
-							{
-								bts[wrong_guesses][i] = BT_LETTER_OK;
-								--chars[letters[wrong_guesses][i]];
-							}
-						}
-						++wrong_guesses;
-						active_letter = 0;
 						leave = true;
 					} break;
 					case SDLK_RSHIFT:
 					{
-						if (wrong_guesses > 0)
+						if (GS_INPROGRESS == gamestatus)
 						{
-							letters[wrong_guesses][active_letter] = letters[wrong_guesses - 1][active_letter];
-							leave = true;
+							if (wrong_guesses > 0)
+							{
+								letters[wrong_guesses][active_letter] = letters[wrong_guesses - 1][active_letter];
+								leave = true;
+							}
 						}
 					} break;
 					case SDLK_ESCAPE:

@@ -2,6 +2,7 @@
 #define _HPP_STATES
 
 #include <string>
+#include <set>
 #include <SDL/SDL.h>
 
 #define WORD_SIZE				(5)
@@ -31,6 +32,13 @@ private:
 		BT_LETTER_POSITION_OK,
 		BT_ACTIVE
 	};
+	enum GameStatus
+	{
+		GS_INPROGRESS,
+		GS_WON,
+		GS_LOST,
+		GS_UNKNOWN_WORD
+	};
 
 	SDL_Surface *bg = nullptr;
 	SDL_Surface *gfx = nullptr;
@@ -39,12 +47,16 @@ private:
 	int wrong_guesses = 0;
 	int active_letter = 0;
 	std::string word_to_guess = "SKILL";
+	std::set<std::string> dict;
+	GameStatus gamestatus = GS_INPROGRESS;
 
 	void drawLetter(int x, int y, char c);
 	void drawBox(int x, int y, BoxType bt);
+	void verifyInputWord();
 public:
 	void loadGfx();
 	void unloadGfx();
+	void loadDictionary();
 	void resetGame();
 	virtual void draw();
 	virtual void processInput();
