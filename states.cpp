@@ -10,9 +10,23 @@
 
 #define SPRITE_SIZE		(40)
 
-StateId stateid = SI_GAME;
+StateId stateid = SI_MENU;
 GameState gamestate;
 MenuState menustate;
+
+void State::processAll()
+{
+	while (getMyStateId() == stateid)
+	{
+		draw();
+		processInput();
+	}
+}
+
+StateId GameState::getMyStateId()
+{
+	return SI_GAME;
+}
 
 void GameState::drawLetter(int x, int y, char c)
 {
@@ -44,6 +58,9 @@ void GameState::loadGfx()
 {
 	bg = IMG_Load("bg.png");
 	gfx = IMG_Load("gfx.png");
+	unknown_word_dialog = IMG_Load("unknownword.png");
+	win_dialog = IMG_Load("won.png");
+	lose_dialog = IMG_Load("lost.png");
 }
 
 void GameState::unloadGfx()
@@ -52,6 +69,12 @@ void GameState::unloadGfx()
 	bg = nullptr;
 	SDL_FreeSurface(gfx);
 	gfx = nullptr;
+	SDL_FreeSurface(unknown_word_dialog);
+	unknown_word_dialog = nullptr;
+	SDL_FreeSurface(win_dialog);
+	win_dialog = nullptr;
+	SDL_FreeSurface(lose_dialog);
+	lose_dialog = nullptr;
 }
 
 void GameState::loadDictionary()
@@ -69,6 +92,7 @@ void GameState::loadDictionary()
 		std::transform(word.begin(), word.end(), word.begin(), toupper);
 		dict.insert(word);
 	}
+	std::cout << "Loaded " << dict.size() << " words." << std::endl;
 }
 
 void GameState::resetGame()
@@ -79,6 +103,10 @@ void GameState::resetGame()
 			letters[j][i] = ' ';
 			bts[j][i] = BT_WRONG;
 		}
+	wrong_guesses = 0;
+	active_letter = 0;
+	gamestatus = GS_INPROGRESS;
+	yellows.clear();
 
 	// choose a random word
 	int steps = rand() % dict.size();
@@ -102,6 +130,12 @@ void GameState::draw()
 				drawBox(x, y, bts[j][i]);
 			drawLetter(x, y, letters[j][i]);
 		}
+	if (GS_UNKNOWN_WORD == gamestatus)
+		SDL_BlitSurface(unknown_word_dialog, NULL, screen, NULL);
+	else if (GS_WON == gamestatus)
+		SDL_BlitSurface(win_dialog, NULL, screen, NULL);
+	else if (GS_LOST == gamestatus)
+		SDL_BlitSurface(lose_dialog, NULL, screen, NULL);
 	SDL_Flip(screen);
 }
 
@@ -115,12 +149,7 @@ void GameState::verifyInputWord()
 	}
 	if (dict.count(word) == 0)
 	{
-		for (int i = 0; i < WORD_SIZE; ++i)
-		{
-			letters[wrong_guesses][i] = ' ';
-		}
-		active_letter = 0;
-		std::cout << "The given word is not in the dictionary." << std::endl;
+		gamestatus = GS_UNKNOWN_WORD;
 	}
 	else
 	{
@@ -142,7 +171,6 @@ void GameState::verifyInputWord()
 		if (WORD_SIZE == correct_letters)
 		{
 			wrong_guesses = MAX_WRONG_GUESSES; // do not display the red box
-			std::cout << "You won." << std::endl;
 			gamestatus = GS_WON;
 		}
 		else
@@ -154,12 +182,12 @@ void GameState::verifyInputWord()
 				{
 					bts[wrong_guesses][i] = BT_LETTER_OK;
 					--chars[letters[wrong_guesses][i]];
+					yellows.insert(letters[wrong_guesses][i]);
 				}
 			}
 			++wrong_guesses;
 			if (MAX_WRONG_GUESSES == wrong_guesses)
 			{
-				std::cout << "You lost." << std::endl;
 				gamestatus = GS_LOST;
 			}
 			active_letter = 0;
@@ -230,6 +258,23 @@ void GameState::processInput()
 						{
 							verifyInputWord();
 						}
+						else if (GS_UNKNOWN_WORD == gamestatus)
+						{
+							for (int i = 0; i < WORD_SIZE; ++i)
+							{
+								letters[wrong_guesses][i] = ' ';
+							}
+							active_letter = 0;
+							gamestatus = GS_INPROGRESS;
+						}
+						else if (GS_WON == gamestatus)
+						{
+							stateid = SI_MENU;
+						}
+						else if (GS_LOST == gamestatus)
+						{
+							stateid = SI_MENU;
+						}
 						leave = true;
 					} break;
 					case SDLK_RSHIFT:
@@ -242,6 +287,83 @@ void GameState::processInput()
 								leave = true;
 							}
 						}
+					} break;
+					case SDLK_SPACE:
+					{
+						if (GS_INPROGRESS == gamestatus)
+						{
+							// find the next yellow letter if any
+							auto it = yellows.find(letters[wrong_guesses][active_letter]);
+							if (it != yellows.end())
+							{
+								++it;
+								if (it == yellows.end())
+									it = yellows.begin();
+							}
+							else
+							{
+								it = yellows.begin();
+							}
+							// if any successor exists, assign it
+							if (it != yellows.end())
+							{
+								letters[wrong_guesses][active_letter] = *it;
+								leave = true;
+							}
+						}
+					} break;
+					case SDLK_ESCAPE:
+					{
+						stateid = SI_MENU;
+						leave = true;
+					} break;
+				} break;
+			case SDL_QUIT:
+			{
+				stateid = SI_QUIT;
+				leave = true;
+			} break;
+		}
+	}
+}
+
+StateId MenuState::getMyStateId()
+{
+	return SI_MENU;
+}
+
+void MenuState::loadGfx()
+{
+	bg = IMG_Load("bgmenu.png");
+}
+
+void MenuState::unloadGfx()
+{
+	SDL_FreeSurface(bg);
+	bg = nullptr;
+}
+
+void MenuState::draw()
+{
+	SDL_BlitSurface(bg, NULL, screen, NULL);
+	SDL_Flip(screen);
+}
+
+void MenuState::processInput()
+{
+	SDL_Event event;
+	bool leave = false;
+	if (SDL_WaitEvent(&event) && !leave)
+	{
+		switch (event.type)
+		{
+			case SDL_KEYDOWN:
+				switch (event.key.keysym.sym)
+				{
+					case SDLK_RETURN:
+					{
+						stateid = SI_GAME;
+						leave = true;
 					} break;
 					case SDLK_ESCAPE:
 					{
@@ -256,12 +378,4 @@ void GameState::processInput()
 			} break;
 		}
 	}
-}
-
-void MenuState::draw()
-{
-}
-
-void MenuState::processInput()
-{
 }
