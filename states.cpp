@@ -8,11 +8,13 @@
 #include <map>
 #include <SDL/SDL_image.h>
 
-#define SPRITE_SIZE		(40)
+#define SPRITE_SIZE			(40)
+#define MAX_ENTRY_ID		(1)
 
 StateId stateid = SI_MENU;
 GameState gamestate;
 MenuState menustate;
+RulesState rulesstate;
 
 void State::processAll()
 {
@@ -77,14 +79,17 @@ void GameState::unloadGfx()
 	lose_dialog = nullptr;
 }
 
-void GameState::loadDictionary()
+void GameState::loadDictionary(int letternum)
 {
-	std::ifstream in("5.txt");
+	std::string path = std::to_string(letternum) + ".txt";
+	word_size = letternum;
+	std::ifstream in(path);
 	std::string word;
+	dict.clear();
 	while (in.good())
 	{
 		in >> word;
-		if (word.size() != WORD_SIZE)
+		if (word.size() != word_size)
 		{
 			std::cerr << "Dictionary error: " << word << std::endl;
 			continue;
@@ -98,7 +103,7 @@ void GameState::loadDictionary()
 void GameState::resetGame()
 {
 	for (int j = 0; j < MAX_WRONG_GUESSES; ++j)
-		for (int i = 0; i < WORD_SIZE; ++i)
+		for (int i = 0; i < MAX_WORD_SIZE; ++i)
 		{
 			letters[j][i] = ' ';
 			bts[j][i] = BT_WRONG;
@@ -120,9 +125,9 @@ void GameState::draw()
 {
 	SDL_BlitSurface(bg, NULL, screen, NULL);
 	for (int j = 0; j < MAX_WRONG_GUESSES; ++j)
-		for (int i = 0; i < WORD_SIZE; ++i)
+		for (int i = 0; i < word_size; ++i)
 		{
-			int x = (SCREEN_WIDTH - WORD_SIZE * SPRITE_SIZE) / 2 + i * SPRITE_SIZE;
+			int x = (SCREEN_WIDTH - word_size * SPRITE_SIZE) / 2 + i * SPRITE_SIZE;
 			int y = j * SPRITE_SIZE;
 			if (j == wrong_guesses && i == active_letter)
 				drawBox(x, y, BT_ACTIVE);
@@ -143,7 +148,7 @@ void GameState::verifyInputWord()
 {
 	// check if in the dictionary
 	std::string word = "";
-	for (int i = 0; i < WORD_SIZE; ++i)
+	for (int i = 0; i < word_size; ++i)
 	{
 		word += letters[wrong_guesses][i];
 	}
@@ -156,7 +161,7 @@ void GameState::verifyInputWord()
 		// search for green guesses
 		int correct_letters = 0;
 		std::map<char, int> chars;
-		for (int i = 0; i < WORD_SIZE; ++i)
+		for (int i = 0; i < word_size; ++i)
 		{
 			if (word_to_guess[i] == letters[wrong_guesses][i])
 			{
@@ -168,7 +173,7 @@ void GameState::verifyInputWord()
 				++chars[word_to_guess[i]];
 			}
 		}
-		if (WORD_SIZE == correct_letters)
+		if (word_size == correct_letters)
 		{
 			wrong_guesses = MAX_WRONG_GUESSES; // do not display the red box
 			gamestatus = GS_WON;
@@ -176,7 +181,7 @@ void GameState::verifyInputWord()
 		else
 		{
 			// search for yellow guesses
-			for (int i = 0; i < WORD_SIZE; ++i)
+			for (int i = 0; i < word_size; ++i)
 			{
 				if (chars[letters[wrong_guesses][i]] > 0 && bts[wrong_guesses][i] != BT_LETTER_POSITION_OK)
 				{
@@ -221,7 +226,7 @@ void GameState::processInput()
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
-							if (active_letter < (WORD_SIZE - 1))
+							if (active_letter < (word_size - 1))
 							{
 								++active_letter;
 								leave = true;
@@ -260,7 +265,7 @@ void GameState::processInput()
 						}
 						else if (GS_UNKNOWN_WORD == gamestatus)
 						{
-							for (int i = 0; i < WORD_SIZE; ++i)
+							for (int i = 0; i < word_size; ++i)
 							{
 								letters[wrong_guesses][i] = ' ';
 							}
@@ -327,6 +332,11 @@ void GameState::processInput()
 	}
 }
 
+int MenuState::getWordLength()
+{
+	return word_length;
+}
+
 StateId MenuState::getMyStateId()
 {
 	return SI_MENU;
@@ -335,17 +345,48 @@ StateId MenuState::getMyStateId()
 void MenuState::loadGfx()
 {
 	bg = IMG_Load("bgmenu.png");
+	fg = IMG_Load("fgmenu.png");
+	digit_select = IMG_Load("digit_selection.png");
+	digit_select_white = IMG_Load("digit_selection_white.png");
+	rules_select = IMG_Load("rules_selection.png");
 }
 
 void MenuState::unloadGfx()
 {
 	SDL_FreeSurface(bg);
 	bg = nullptr;
+	SDL_FreeSurface(fg);
+	fg = nullptr;
+	SDL_FreeSurface(digit_select);
+	digit_select = nullptr;
+	SDL_FreeSurface(digit_select_white);
+	digit_select_white = nullptr;
+	SDL_FreeSurface(rules_select);
+	rules_select = nullptr;
 }
 
 void MenuState::draw()
 {
+	SDL_Rect dst;
 	SDL_BlitSurface(bg, NULL, screen, NULL);
+	if (0 == index)
+	{
+		dst.x = 171 + 24 * (word_length - MIN_WORD_SIZE);
+		dst.y = 128;
+		SDL_BlitSurface(digit_select, NULL, screen, &dst);
+	}
+	else if (1 == index)
+	{
+		dst.x = 171 + 24 * (word_length - MIN_WORD_SIZE);
+		dst.y = 128;
+		SDL_BlitSurface(digit_select_white, NULL, screen, &dst);
+		dst.x = 97;
+		dst.y = 144;
+		SDL_BlitSurface(rules_select, NULL, screen, &dst);
+	}
+	dst.x = 38;
+	dst.y = 150;
+	SDL_BlitSurface(fg, NULL, screen, &dst);
 	SDL_Flip(screen);
 }
 
@@ -360,14 +401,104 @@ void MenuState::processInput()
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym)
 				{
+					case SDLK_LEFT:
+					{
+						if (0 == index)
+						{
+							if (word_length > MIN_WORD_SIZE)
+							{
+								--word_length;
+								leave = true;
+							}
+						}
+					} break;
+					case SDLK_RIGHT:
+					{
+						if (0 == index)
+						{
+							if (word_length < MAX_WORD_SIZE)
+							{
+								++word_length;
+								leave = true;
+							}
+						}
+					} break;
+					case SDLK_UP:
+					{
+						if (index > 0)
+						{
+							--index;
+							leave = true;
+						}
+					} break;
+					case SDLK_DOWN:
+					{
+						if (index < MAX_ENTRY_ID)
+						{
+							++index;
+							leave = true;
+						}
+					} break;
 					case SDLK_RETURN:
 					{
-						stateid = SI_GAME;
+						if (0 == index)
+							stateid = SI_GAME;
+						else if (1 == index)
+							stateid = SI_RULES;
 						leave = true;
 					} break;
 					case SDLK_ESCAPE:
 					{
 						stateid = SI_QUIT;
+						leave = true;
+					} break;
+				} break;
+			case SDL_QUIT:
+			{
+				stateid = SI_QUIT;
+				leave = true;
+			} break;
+		}
+	}
+}
+
+StateId RulesState::getMyStateId()
+{
+	return SI_RULES;
+}
+
+void RulesState::loadGfx()
+{
+	bg = IMG_Load("bgrules.png");
+}
+
+void RulesState::unloadGfx()
+{
+	SDL_FreeSurface(bg);
+	bg = nullptr;
+}
+
+void RulesState::draw()
+{
+	SDL_BlitSurface(bg, NULL, screen, NULL);
+	SDL_Flip(screen);
+}
+
+void RulesState::processInput()
+{
+	SDL_Event event;
+	bool leave = false;
+	if (SDL_WaitEvent(&event) && !leave)
+	{
+		switch (event.type)
+		{
+			case SDL_KEYDOWN:
+				switch (event.key.keysym.sym)
+				{
+					case SDLK_RETURN:
+					case SDLK_ESCAPE:
+					{
+						stateid = SI_MENU;
 						leave = true;
 					} break;
 				} break;

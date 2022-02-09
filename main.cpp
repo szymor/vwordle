@@ -15,26 +15,31 @@ int main(int argc, char *argv[])
 	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_HWSURFACE | SDL_DOUBLEBUF);
 	SDL_EnableKeyRepeat(300, 100);
 	SDL_ShowCursor(SDL_DISABLE);
-	menustate.loadGfx();
-	gamestate.loadGfx();
-	gamestate.loadDictionary();
 
 	while (SI_QUIT != stateid)
 	{
 		switch (stateid)
 		{
 			case SI_MENU:
+				menustate.loadGfx();
 				menustate.processAll();
+				menustate.unloadGfx();
 				break;
 			case SI_GAME:
+				gamestate.loadGfx();
+				gamestate.loadDictionary(menustate.getWordLength());
 				gamestate.resetGame();
 				gamestate.processAll();
+				gamestate.unloadGfx();
+				break;
+			case SI_RULES:
+				rulesstate.loadGfx();
+				rulesstate.processAll();
+				rulesstate.unloadGfx();
 				break;
 		}
 	}
 
-	menustate.unloadGfx();
-	gamestate.unloadGfx();
 	SDL_Quit();
 	return 0;
 }

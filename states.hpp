@@ -5,13 +5,15 @@
 #include <set>
 #include <SDL/SDL.h>
 
-#define WORD_SIZE				(5)
-#define MAX_WRONG_GUESSES		(6)
+#define MIN_WORD_SIZE				(5)
+#define MAX_WORD_SIZE				(8)
+#define MAX_WRONG_GUESSES			(6)
 
 enum StateId
 {
 	SI_MENU,
 	SI_GAME,
+	SI_RULES,
 	SI_QUIT
 };
 
@@ -48,10 +50,11 @@ private:
 	SDL_Surface *unknown_word_dialog = nullptr;
 	SDL_Surface *win_dialog = nullptr;
 	SDL_Surface *lose_dialog = nullptr;
-	char letters[MAX_WRONG_GUESSES][WORD_SIZE];
-	BoxType bts[MAX_WRONG_GUESSES][WORD_SIZE];
+	char letters[MAX_WRONG_GUESSES][MAX_WORD_SIZE];
+	BoxType bts[MAX_WRONG_GUESSES][MAX_WORD_SIZE];
 	int wrong_guesses = 0;
 	int active_letter = 0;
+	int word_size = 5;
 	std::string word_to_guess;
 	std::set<std::string> dict;
 	std::set<char> yellows;		// used for quick input of yellow letters
@@ -64,13 +67,32 @@ private:
 public:
 	void loadGfx();
 	void unloadGfx();
-	void loadDictionary();
+	void loadDictionary(int letternum);
 	void resetGame();
 	virtual void draw();
 	virtual void processInput();
 };
 
 class MenuState : public State
+{
+private:
+	SDL_Surface *bg = nullptr;
+	SDL_Surface *fg = nullptr;
+	SDL_Surface *digit_select = nullptr;
+	SDL_Surface *digit_select_white = nullptr;
+	SDL_Surface *rules_select = nullptr;
+	int index = 0;
+	int word_length = 5;
+	virtual StateId getMyStateId();
+public:
+	int getWordLength();
+	void loadGfx();
+	void unloadGfx();
+	virtual void draw();
+	virtual void processInput();
+};
+
+class RulesState : public State
 {
 private:
 	SDL_Surface *bg = nullptr;
@@ -85,5 +107,6 @@ public:
 extern StateId stateid;
 extern GameState gamestate;
 extern MenuState menustate;
+extern RulesState rulesstate;
 
 #endif
