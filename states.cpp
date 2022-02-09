@@ -259,11 +259,7 @@ void GameState::processInput()
 					} break;
 					case SDLK_RETURN:
 					{
-						if (GS_INPROGRESS == gamestatus)
-						{
-							verifyInputWord();
-						}
-						else if (GS_UNKNOWN_WORD == gamestatus)
+						if (GS_UNKNOWN_WORD == gamestatus)
 						{
 							for (int i = 0; i < word_size; ++i)
 							{
@@ -282,7 +278,14 @@ void GameState::processInput()
 						}
 						leave = true;
 					} break;
-					case SDLK_RSHIFT:
+					case SDLK_LALT:
+					{
+						if (GS_INPROGRESS == gamestatus)
+						{
+							verifyInputWord();
+						}
+					} break;
+					case SDLK_LCTRL:
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{

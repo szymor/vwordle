@@ -1,0 +1,17 @@
+.PHONY: all clean
+
+PROJECT=vwordle
+SRC=main.cpp states.cpp
+HDR=global.hpp states.hpp
+CXX=arm-linux-g++
+PKGCONF=$(shell $(CXX) --print-sysroot)/../../bin/pkg-config
+CFLAGS=$(shell $(PKGCONF) --cflags sdl SDL_image) -Ofast -march=armv5te -mtune=arm926ej-s -DMIYOO
+LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image) -ljpeg -lpng -lz
+
+all: $(PROJECT)
+
+$(PROJECT): $(SRC) $(HDR)
+	$(CXX) -o $(PROJECT) $(CFLAGS) $(SRC) $(LFLAGS)
+
+clean:
+	rm -rf $(PROJECT)
