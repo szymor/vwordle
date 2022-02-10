@@ -137,12 +137,25 @@ void GameState::draw()
 				drawBox(x, y, bts[j][i]);
 			drawLetter(x, y, letters[j][i]);
 		}
+    SDL_Rect dst;
 	if (GS_UNKNOWN_WORD == gamestatus)
-		SDL_BlitSurface(unknown_word_dialog, NULL, screen, NULL);
+    {
+        dst.x = 28;
+        dst.y = 44;
+		SDL_BlitSurface(unknown_word_dialog, NULL, screen, &dst);
+    }
 	else if (GS_WON == gamestatus)
-		SDL_BlitSurface(win_dialog, NULL, screen, NULL);
+    {
+        dst.x = 0;
+        dst.y = 25;
+		SDL_BlitSurface(win_dialog, NULL, screen, &dst);
+    }
 	else if (GS_LOST == gamestatus)
-		SDL_BlitSurface(lose_dialog, NULL, screen, NULL);
+    {
+        dst.x = 0;
+        dst.y = 25;
+		SDL_BlitSurface(lose_dialog, NULL, screen, &dst);
+    }
 	SDL_Flip(screen);
 }
 
