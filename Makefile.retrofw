@@ -1,21 +1,25 @@
 .PHONY: all clean
 
 PROJECT=vwordle
+OPK=$(PROJECT).opk
 SRCPATH=src
 INCPATH=inc
 SRC=main.cpp states.cpp
 SRC:=$(addprefix $(SRCPATH)/, $(SRC))
 INC=global.hpp states.hpp
 INC:=$(addprefix $(INCPATH)/, $(INC))
-CXX=arm-linux-g++
+CXX=mipsel-linux-g++
 PKGCONF=$(shell $(CXX) --print-sysroot)/../../bin/pkg-config
-CFLAGS=$(shell $(PKGCONF) --cflags sdl SDL_image) -I$(INCPATH) -Ofast -march=armv5te -mtune=arm926ej-s -DMIYOO
-LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image) -ljpeg -lpng -lz
+CFLAGS=$(shell $(PKGCONF) --cflags sdl SDL_image) -I$(INCPATH) -Ofast -DRETROFW
+LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image)
 
-all: $(PROJECT)
+all: $(OPK)
 
 $(PROJECT): $(SRC) $(INC)
 	$(CXX) -o $(PROJECT) $(CFLAGS) $(SRC) $(LFLAGS)
+
+$(OPK): $(PROJECT) gfx dict icon.png README.md $(PROJECT).retrofw.desktop
+	mksquashfs $^ $@ -noappend -no-xattrs
 
 clean:
 	rm -rf $(PROJECT)

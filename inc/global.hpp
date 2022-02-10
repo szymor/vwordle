@@ -7,6 +7,29 @@
 #define SCREEN_HEIGHT		(240)
 #define SCREEN_BPP			(32)
 
+#if defined(MIYOO)
+#define KEY_A		SDLK_LALT
+#define KEY_B		SDLK_LCTRL
+#define KEY_X		SDLK_LSHIFT
+#define KEY_Y		SDLK_SPACE
+#define KEY_START	SDLK_RETURN
+#define KEY_SELECT	SDLK_ESCAPE
+#elif defined(RETROFW)
+#define KEY_A		SDLK_LCTRL
+#define KEY_B		SDLK_LALT
+#define KEY_X		SDLK_SPACE
+#define KEY_Y		SDLK_LSHIFT
+#define KEY_START	SDLK_RETURN
+#define KEY_SELECT	SDLK_ESCAPE
+#else
+#define KEY_A		SDLK_LALT
+#define KEY_B		SDLK_LCTRL
+#define KEY_X		SDLK_LSHIFT
+#define KEY_Y		SDLK_SPACE
+#define KEY_START	SDLK_RETURN
+#define KEY_SELECT	SDLK_ESCAPE
+#endif
+
 extern SDL_Surface *screen;
 
 #endif

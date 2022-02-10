@@ -272,7 +272,7 @@ void GameState::processInput()
 							leave = true;
 						}
 					} break;
-					case SDLK_RETURN:
+					case KEY_START:
 					{
 						if (GS_UNKNOWN_WORD == gamestatus)
 						{
@@ -289,14 +289,14 @@ void GameState::processInput()
 						}
 						leave = true;
 					} break;
-					case SDLK_LALT:
+					case KEY_A:
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
 							verifyInputWord();
 						}
 					} break;
-					case SDLK_LCTRL:
+					case KEY_B:
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
@@ -307,7 +307,7 @@ void GameState::processInput()
 							}
 						}
 					} break;
-					case SDLK_SPACE:
+					case KEY_Y:
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
@@ -331,7 +331,7 @@ void GameState::processInput()
 							}
 						}
 					} break;
-					case SDLK_ESCAPE:
+					case KEY_SELECT:
 					{
 						stateid = SI_MENU;
 						leave = true;
@@ -453,7 +453,7 @@ void MenuState::processInput()
 							leave = true;
 						}
 					} break;
-					case SDLK_RETURN:
+					case KEY_START:
 					{
 						if (0 == index)
 							stateid = SI_GAME;
@@ -461,7 +461,7 @@ void MenuState::processInput()
 							stateid = SI_RULES;
 						leave = true;
 					} break;
-					case SDLK_ESCAPE:
+					case KEY_SELECT:
 					{
 						stateid = SI_QUIT;
 						leave = true;
@@ -509,8 +509,8 @@ void RulesState::processInput()
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym)
 				{
-					case SDLK_RETURN:
-					case SDLK_ESCAPE:
+					case KEY_START:
+					case KEY_SELECT:
 					{
 						stateid = SI_MENU;
 						leave = true;

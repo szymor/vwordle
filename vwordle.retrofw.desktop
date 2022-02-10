@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=VWordle
+Comment=A word guessing game
+Exec=vwordle
+Terminal=false
+Type=Game
+StartupNotify=true
+Icon=icon
+Categories=games;
+Version=20220210
+X-OD-Manual=README.md
