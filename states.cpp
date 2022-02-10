@@ -10,6 +10,8 @@
 
 #define SPRITE_SIZE			(40)
 #define MAX_ENTRY_ID		(1)
+#define GFX_PATH			"gfx/"
+#define DICT_PATH			"dict/"
 
 StateId stateid = SI_MENU;
 GameState gamestate;
@@ -58,11 +60,11 @@ void GameState::drawBox(int x, int y, BoxType bt)
 
 void GameState::loadGfx()
 {
-	bg = IMG_Load("bg.png");
-	gfx = IMG_Load("gfx.png");
-	unknown_word_dialog = IMG_Load("unknownword.png");
-	win_dialog = IMG_Load("won.png");
-	lose_dialog = IMG_Load("lost.png");
+	bg = IMG_Load(GFX_PATH "bg.png");
+	gfx = IMG_Load(GFX_PATH "gfx.png");
+	unknown_word_dialog = IMG_Load(GFX_PATH "unknownword.png");
+	win_dialog = IMG_Load(GFX_PATH "won.png");
+	lose_dialog = IMG_Load(GFX_PATH "lost.png");
 }
 
 void GameState::unloadGfx()
@@ -81,7 +83,7 @@ void GameState::unloadGfx()
 
 void GameState::loadDictionary(int letternum)
 {
-	std::string path = std::to_string(letternum) + ".txt";
+	std::string path = DICT_PATH + std::to_string(letternum) + ".txt";
 	word_size = letternum;
 	std::ifstream in(path);
 	std::string word;
@@ -261,10 +263,6 @@ void GameState::processInput()
 					{
 						if (GS_UNKNOWN_WORD == gamestatus)
 						{
-							for (int i = 0; i < word_size; ++i)
-							{
-								letters[wrong_guesses][i] = ' ';
-							}
 							active_letter = 0;
 							gamestatus = GS_INPROGRESS;
 						}
@@ -347,11 +345,11 @@ StateId MenuState::getMyStateId()
 
 void MenuState::loadGfx()
 {
-	bg = IMG_Load("bgmenu.png");
-	fg = IMG_Load("fgmenu.png");
-	digit_select = IMG_Load("digit_selection.png");
-	digit_select_white = IMG_Load("digit_selection_white.png");
-	rules_select = IMG_Load("rules_selection.png");
+	bg = IMG_Load(GFX_PATH "bgmenu.png");
+	fg = IMG_Load(GFX_PATH "fgmenu.png");
+	digit_select = IMG_Load(GFX_PATH "digit_selection.png");
+	digit_select_white = IMG_Load(GFX_PATH "digit_selection_white.png");
+	rules_select = IMG_Load(GFX_PATH "rules_selection.png");
 }
 
 void MenuState::unloadGfx()
@@ -472,7 +470,7 @@ StateId RulesState::getMyStateId()
 
 void RulesState::loadGfx()
 {
-	bg = IMG_Load("bgrules.png");
+	bg = IMG_Load(GFX_PATH "bgrules.png");
 }
 
 void RulesState::unloadGfx()
