@@ -42,7 +42,8 @@ private:
 		GS_INPROGRESS,
 		GS_WON,
 		GS_LOST,
-		GS_UNKNOWN_WORD
+		GS_UNKNOWN_WORD,
+		GS_VIRTUAL_KEYBOARD
 	};
 
 	SDL_Surface *bg = nullptr;
@@ -50,11 +51,17 @@ private:
 	SDL_Surface *unknown_word_dialog = nullptr;
 	SDL_Surface *win_dialog = nullptr;
 	SDL_Surface *lose_dialog = nullptr;
+	SDL_Surface *letter_select = nullptr;
+	SDL_Surface *check_select = nullptr;
+	SDL_Surface *keyboard_bg = nullptr;
+	SDL_Surface *keyboard_fg = nullptr;
 	char letters[MAX_WRONG_GUESSES][MAX_WORD_SIZE];
 	BoxType bts[MAX_WRONG_GUESSES][MAX_WORD_SIZE];
 	int wrong_guesses = 0;
 	int active_letter = 0;
 	int word_size = 5;
+	int keyx = 0;
+	int keyy = 0;
 	std::string word_to_guess;
 	std::set<std::string> dict;
 	std::set<char> yellows;		// used for quick input of yellow letters
