@@ -1,5 +1,6 @@
 #include "states.hpp"
 #include "global.hpp"
+#include "sound.hpp"
 #include <fstream>
 #include <iostream>
 #include <algorithm>
@@ -235,6 +236,7 @@ void GameState::verifyInputWord()
 	}
 	else
 	{
+		playLoudClick();
 		// search for green guesses
 		int correct_letters = 0;
 		std::map<char, int> chars;
@@ -279,6 +281,7 @@ void GameState::verifyInputWord()
 
 void GameState::decrementActiveLetter()
 {
+	playSilentClick();
 	if (active_letter > 0)
 	{
 		--active_letter;
@@ -287,6 +290,7 @@ void GameState::decrementActiveLetter()
 
 void GameState::incrementActiveLetter()
 {
+	playSilentClick();
 	if (active_letter < (word_size - 1))
 	{
 		++active_letter;
@@ -466,8 +470,7 @@ void GameState::processInput()
 							{
 								char &letter = letters[wrong_guesses][active_letter];
 								letter = keys[keyy][keyx];
-								if (active_letter < (word_size - 1))
-									++active_letter;
+								incrementActiveLetter();
 							}
 						}
 					} break;
