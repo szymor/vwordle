@@ -71,6 +71,8 @@ private:
 	void drawLetter(int x, int y, char c);
 	void drawBox(int x, int y, BoxType bt);
 	void verifyInputWord();
+	void incrementActiveLetter();
+	void decrementActiveLetter();
 public:
 	void loadGfx();
 	void unloadGfx();

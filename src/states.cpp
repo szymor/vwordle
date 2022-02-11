@@ -277,6 +277,22 @@ void GameState::verifyInputWord()
 	}
 }
 
+void GameState::decrementActiveLetter()
+{
+	if (active_letter > 0)
+	{
+		--active_letter;
+	}
+}
+
+void GameState::incrementActiveLetter()
+{
+	if (active_letter < (word_size - 1))
+	{
+		++active_letter;
+	}
+}
+
 void GameState::processInput()
 {
 	SDL_Event event;
@@ -292,40 +308,39 @@ void GameState::processInput()
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
-							if (active_letter > 0)
-							{
-								--active_letter;
-								leave = true;
-							}
+							decrementActiveLetter();
+							leave = true;
 						}
 						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 						{
-							if (keyx > 0)
+							--keyx;
+							if (keyx < 0)
 							{
-								--keyx;
-								leave = true;
+								switch(keyy)
+								{
+									case 0: keyx = MAX_KEYNUM_0_ID; break;
+									case 1: keyx = MAX_KEYNUM_1_ID; break;
+									case 2: keyx = MAX_KEYNUM_2_ID; break;
+								}
 							}
+							leave = true;
 						}
 					} break;
 					case SDLK_RIGHT:
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
-							if (active_letter < (word_size - 1))
-							{
-								++active_letter;
-								leave = true;
-							}
+							incrementActiveLetter();
+							leave = true;
 						}
 						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 						{
-							if ((0 == keyy && keyx < MAX_KEYNUM_0_ID) ||
-								(1 == keyy && keyx < MAX_KEYNUM_1_ID) ||
-								(2 == keyy && keyx < MAX_KEYNUM_2_ID))
-							{
-								++keyx;
-								leave = true;
-							}
+							++keyx;
+							if ((0 == keyy && keyx > MAX_KEYNUM_0_ID) ||
+								(1 == keyy && keyx > MAX_KEYNUM_1_ID) ||
+								(2 == keyy && keyx > MAX_KEYNUM_2_ID))
+								keyx = 0;
+							leave = true;
 						}
 					} break;
 					case SDLK_UP:
@@ -390,6 +405,24 @@ void GameState::processInput()
 								}
 								leave = true;
 							}
+						}
+					} break;
+					case KEY_L1:
+					{
+						if ((GS_INPROGRESS == gamestatus) ||
+							(GS_VIRTUAL_KEYBOARD == gamestatus))
+						{
+							decrementActiveLetter();
+							leave = true;
+						}
+					} break;
+					case KEY_R1:
+					{
+						if ((GS_INPROGRESS == gamestatus) ||
+							(GS_VIRTUAL_KEYBOARD == gamestatus))
+						{
+							incrementActiveLetter();
+							leave = true;
 						}
 					} break;
 					case KEY_START:
