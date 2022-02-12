@@ -10,7 +10,14 @@ Mix_Chunk *loud = nullptr;
 
 void loadSounds()
 {
-	music = Mix_LoadMUS(MUSIC_PATH "soundscape3.mp3");
+	if (rand() % 256 < 128)
+	{
+		music = Mix_LoadMUS(MUSIC_PATH "soundscape3.mp3");
+	}
+	else
+	{
+		music = Mix_LoadMUS(MUSIC_PATH "soundscape1.mp3");
+	}
 	silent = Mix_LoadWAV(SFX_PATH "click1.wav");
 	loud = Mix_LoadWAV(SFX_PATH "click2.ogg");
 }
