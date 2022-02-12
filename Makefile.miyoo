@@ -3,14 +3,14 @@
 PROJECT=vwordle
 SRCPATH=src
 INCPATH=inc
-SRC=main.cpp states.cpp
+SRC=main.cpp states.cpp sound.cpp
 SRC:=$(addprefix $(SRCPATH)/, $(SRC))
-INC=global.hpp states.hpp
+INC=global.hpp states.hpp sound.hpp
 INC:=$(addprefix $(INCPATH)/, $(INC))
 CXX=arm-linux-g++
 PKGCONF=$(shell $(CXX) --print-sysroot)/../../bin/pkg-config
-CFLAGS=$(shell $(PKGCONF) --cflags sdl SDL_image) -I$(INCPATH) -Ofast -march=armv5te -mtune=arm926ej-s -DMIYOO
-LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image) -ljpeg -lpng -lz
+CFLAGS=$(shell $(PKGCONF) --cflags sdl SDL_image SDL_mixer) -I$(INCPATH) -Ofast -march=armv5te -mtune=arm926ej-s -DMIYOO
+LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image SDL_mixer) -ljpeg -lpng -lz -logg
 
 all: $(PROJECT)
 
