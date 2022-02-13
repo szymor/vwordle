@@ -64,12 +64,15 @@ private:
 	int keyy = 0;
 	std::string word_to_guess;
 	std::set<std::string> dict;
-	std::set<char> yellows;		// used for quick input of yellow letters
+	std::set<char> greens;
+	std::set<char> yellows;
+	std::set<char> grays;
 	GameStatus gamestatus = GS_INPROGRESS;
 
 	virtual StateId getMyStateId();
 	void drawLetter(int x, int y, char c);
 	void drawBox(int x, int y, BoxType bt);
+	SDL_Surface *newColoredKeyboard();
 	void verifyInputWord();
 	void incrementActiveLetter();
 	void decrementActiveLetter();

@@ -27,9 +27,9 @@
 #define CHECK_POS_Y			(2)
 
 static constexpr char keys[KBRD_ROWS][KBRD_COLS] = {
-	{ 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P' },   // to avoid storing the null terminator
-	"ASDFGHJKL",
-	"ZXCVBNM"
+	{ 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P' },
+	{ 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',  0 },
+	{ 'Z', 'X', 'C', 'V', 'B', 'N', 'M',   0,   0,  0 }
 };
 
 StateId stateid = SI_MENU;
@@ -146,7 +146,9 @@ void GameState::resetGame()
 	keyx = 0;
 	keyy = 0;
 	gamestatus = GS_INPROGRESS;
+	greens.clear();
 	yellows.clear();
+	grays.clear();
 
 	// choose a random word
 	int steps = rand() % dict.size();
@@ -154,6 +156,71 @@ void GameState::resetGame()
 	std::advance(it, steps);
 	word_to_guess = *it;
 	std::cout << "Word to guess: " << word_to_guess << std::endl;
+}
+
+SDL_Surface *GameState::newColoredKeyboard()
+{
+	SDL_Surface *temp = SDL_CreateRGBSurface(SDL_HWSURFACE,
+		keyboard_fg->w,
+		keyboard_fg->h,
+		keyboard_fg->format->BitsPerPixel,
+		keyboard_fg->format->Rmask,
+		keyboard_fg->format->Gmask,
+		keyboard_fg->format->Bmask,
+		keyboard_fg->format->Amask);
+	SDL_SetAlpha(keyboard_fg, 0, 0);
+	SDL_BlitSurface(keyboard_fg, NULL, temp, NULL);
+
+	SDL_LockSurface(temp);
+	SDL_Rect rect;
+	rect.w = 32;
+	rect.h = 24;
+	for (int i = 0; i < KBRD_ROWS; ++i)
+		for (int j = 0; j < KBRD_COLS; ++j)
+		{
+			// code duplication - see ::draw
+			rect.x = 0 + j * 32 + i * 8;
+			rect.y = 21 + i * 24;
+			bool mask = false;
+			int mb, mg, mr;
+			if (greens.count(keys[i][j]) > 0)
+			{
+				mr = 0;
+				mg = 800;
+				mb = 0;
+				mask = true;
+			}
+			else if (yellows.count(keys[i][j]) > 0)
+			{
+				mr = 800;
+				mg = 800;
+				mb = 0;
+				mask = true;
+			}
+			else if (grays.count(keys[i][j]) > 0)
+			{
+				mr = 600;
+				mg = 600;
+				mb = 600;
+				mask = true;
+			}
+			Uint32 *img = (Uint32*)(temp->pixels);
+			for (int y = rect.y; y < rect.y + rect.h; ++y)
+				for (int x = rect.x; x < rect.x + rect.w; ++x)
+				{
+					if (mask)
+					{
+						Uint8 *r = (Uint8*)(&img[y * temp->w + x]);
+						Uint8 *g = r + 1;
+						Uint8 *b = r + 2;
+						*b = *b * mb / 1000;
+						*g = *g * mg / 1000;
+						*r = *r * mr / 1000;
+					}
+				}
+		}
+	SDL_UnlockSurface(temp);
+	return temp;
 }
 
 void GameState::draw()
@@ -216,8 +283,11 @@ void GameState::draw()
 			dst.y += 32 + keyy * 24 - 30;
 			SDL_BlitSurface(letter_select, NULL, screen, &dst);
 		}
+
 		dst = tdst;
-		SDL_BlitSurface(keyboard_fg, NULL, screen, &dst);
+		SDL_Surface *ckeyboard = newColoredKeyboard();
+		SDL_BlitSurface(ckeyboard, NULL, screen, &dst);
+		SDL_FreeSurface(ckeyboard);
 	}
 	SDL_Flip(screen);
 }
@@ -246,6 +316,7 @@ void GameState::verifyInputWord()
 			{
 				bts[wrong_guesses][i] = BT_LETTER_POSITION_OK;
 				++correct_letters;
+				greens.insert(letters[wrong_guesses][i]);
 			}
 			else
 			{
@@ -267,6 +338,10 @@ void GameState::verifyInputWord()
 					bts[wrong_guesses][i] = BT_LETTER_OK;
 					--chars[letters[wrong_guesses][i]];
 					yellows.insert(letters[wrong_guesses][i]);
+				}
+				else if (bts[wrong_guesses][i] != BT_LETTER_POSITION_OK)
+				{
+					grays.insert(letters[wrong_guesses][i]);
 				}
 			}
 			++wrong_guesses;
