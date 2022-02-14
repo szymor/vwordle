@@ -4,22 +4,22 @@ PROJECT=vwordle
 OPK=$(PROJECT).opk
 SRCPATH=src
 INCPATH=inc
-SRC=main.cpp states.cpp
+SRC=main.cpp states.cpp sound.cpp
 SRC:=$(addprefix $(SRCPATH)/, $(SRC))
-INC=global.hpp states.hpp
+INC=global.hpp states.hpp sound.hpp
 INC:=$(addprefix $(INCPATH)/, $(INC))
 CXX=mipsel-linux-g++
 PKGCONF=$(shell $(CXX) --print-sysroot)/../../bin/pkg-config
-CFLAGS=$(shell $(PKGCONF) --cflags sdl SDL_image) -I$(INCPATH) -Ofast -DRETROFW
-LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image)
+CFLAGS=$(shell $(PKGCONF) --cflags sdl SDL_image SDL_mixer) -I$(INCPATH) -Ofast -DRETROFW
+LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image SDL_mixer)
 
 all: $(OPK)
 
 $(PROJECT): $(SRC) $(INC)
 	$(CXX) -o $(PROJECT) $(CFLAGS) $(SRC) $(LFLAGS)
 
-$(OPK): $(PROJECT) gfx dict icon.png README.md $(PROJECT).retrofw.desktop
+$(OPK): $(PROJECT) gfx dict music sfx icon.png README.md LICENSE.md cc010.txt ccby40.txt $(PROJECT).retrofw.desktop
 	mksquashfs $^ $@ -noappend -no-xattrs
 
 clean:
-	rm -rf $(PROJECT)
+	rm -rf $(PROJECT) $(OPK)
