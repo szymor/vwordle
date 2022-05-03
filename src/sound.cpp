@@ -1,5 +1,6 @@
 #include "sound.hpp"
 #include <SDL/SDL_mixer.h>
+#include <stdlib.h>
 
 #define MUSIC_PATH		"music/"
 #define SFX_PATH		"sfx/"

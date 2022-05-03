@@ -9,6 +9,11 @@
 #include <map>
 #include <SDL/SDL_image.h>
 
+#ifdef WEBOS
+#include <emscripten.h>
+#define SDL_WaitEvent SDL_PollEvent
+#endif
+
 #define SPRITE_SIZE			(40)
 #define MAX_ENTRY_ID		(1)
 #define GFX_PATH			"gfx/"
@@ -43,6 +48,9 @@ void State::processAll()
 	{
 		draw();
 		processInput();
+#ifdef WEBOS
+		emscripten_sleep(50);
+#endif
 	}
 }
 

@@ -1,0 +1,35 @@
+.PHONY: all clean sim
+
+PROJECT=vwordle.html
+APPDIR=vwordle-app
+IPK=org.vmsth.vwordle_1.0.0_all.ipk
+DEPS=vwordle.html.mem vwordle.js vwordle.data
+
+SRCPATH=src
+INCPATH=inc
+
+SRC=main.cpp states.cpp sound.cpp
+SRC:=$(addprefix $(SRCPATH)/, $(SRC))
+
+INC=global.hpp states.hpp sound.hpp
+INC:=$(addprefix $(INCPATH)/, $(INC))
+
+CXX=em++
+
+CFLAGS=-s WASM=0 -s ASYNCIFY -s DISABLE_EXCEPTION_CATCHING=0 -s STB_IMAGE=1 -I$(INCPATH) -DWEBOS -O2 -std=c++17
+LFLAGS=$(addprefix --preload-file ,gfx dict music sfx)
+
+all: $(IPK)
+
+sim:
+	ares-launch -s 22 $(APPDIR)
+
+$(IPK): $(PROJECT)
+	cp -f $(DEPS) $(APPDIR)
+	ares-package $(APPDIR)
+
+$(PROJECT): $(SRC) $(INC)
+	$(CXX) -o $(PROJECT) $(CFLAGS) $(SRC) $(LFLAGS)
+
+clean:
+	rm -rf $(PROJECT) vwordle.wasm $(DEPS) $(IPK)

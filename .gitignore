@@ -1,2 +1,8 @@
 vwordle
 *.opk
+*.ipk
+vwordle.data
+vwordle.html
+vwordle.js
+vwordle.wasm
+vwordle.html.mem

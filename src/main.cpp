@@ -46,6 +46,9 @@ int main(int argc, char *argv[])
 				rulesstate.processAll();
 				rulesstate.unloadGfx();
 				break;
+			case SI_QUIT:
+				// no action
+				break;
 		}
 	}
 

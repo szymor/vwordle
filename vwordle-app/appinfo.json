@@ -1,0 +1,12 @@
+{
+  "id": "org.vmsth.vwordle",
+  "version": "1.0.0",
+  "vendor": "vamastah",
+  "type": "web",
+  "main": "index.html",
+  "title": "VWordle",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "splashBackground": "splash.png",
+  "iconColor": "black"
+}
