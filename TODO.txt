@@ -1,7 +1,6 @@
 - przejrzec slowniki i powykreslac slowa nieznane przecietnej osobie - do przemyslenia
 - muzyka przestaje grac po jednym razie na bittboyu (brak reprodukcji na kompie) - czeba naprawic
 - bardziej szczegolowe instrukcje - dac wiecej stron np o klawiszologii
-- okienko z informacja o braku slowa w slowniku powinno znikac po kilku sekundach
 - slowo do zgadniecia po przegranej powinno byc pokazywane (czy zawsze?)
 - rozne komunikaty o wygranej w zaleznosci od liczby nieudanych prob
 - rozne wersje jezykowe gry

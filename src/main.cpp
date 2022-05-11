@@ -13,7 +13,7 @@ SDL_Surface *screen = nullptr;
 int main(int argc, char *argv[])
 {
 	srand(time(NULL));
-	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER);
 	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_HWSURFACE | SDL_DOUBLEBUF);
 	SDL_EnableKeyRepeat(300, 100);
 	SDL_ShowCursor(SDL_DISABLE);

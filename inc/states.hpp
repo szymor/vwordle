@@ -69,6 +69,7 @@ private:
 	std::set<char> grays;
 	GameStatus gamestatus = GS_INPROGRESS;
 
+	static Uint32 closePopupCb(Uint32 interval, void *param);
 	virtual StateId getMyStateId();
 	void drawLetter(int x, int y, char c);
 	void drawBox(int x, int y, BoxType bt);

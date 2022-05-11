@@ -14,6 +14,7 @@
 #define SDL_WaitEvent SDL_PollEvent
 #endif
 
+#define POPUP_TIMEOUT       (2000)
 #define SPRITE_SIZE			(40)
 #define MAX_ENTRY_ID		(1)
 #define GFX_PATH			"gfx/"
@@ -300,6 +301,17 @@ void GameState::draw()
 	SDL_Flip(screen);
 }
 
+Uint32 GameState::closePopupCb(Uint32 interval, void *param)
+{
+	SDL_UserEvent ue;
+	ue.type = SDL_USEREVENT;
+	ue.code = 0;	// irrelevant as we have a single user event type only
+	ue.data1 = NULL;
+	ue.data2 = NULL;
+	SDL_PushEvent((SDL_Event*)&ue);
+	return 0;
+}
+
 void GameState::verifyInputWord()
 {
 	// check if in the dictionary
@@ -311,6 +323,7 @@ void GameState::verifyInputWord()
 	if (dict.count(word) == 0)
 	{
 		gamestatus = GS_UNKNOWN_WORD;
+		SDL_AddTimer(POPUP_TIMEOUT, closePopupCb, NULL);
 	}
 	else
 	{
@@ -388,6 +401,14 @@ void GameState::processInput()
 	{
 		switch (event.type)
 		{
+			case SDL_USEREVENT:
+			{
+				if (GS_UNKNOWN_WORD == gamestatus)
+				{
+					active_letter = 0;
+					gamestatus = GS_INPROGRESS;
+				}
+			} break;
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym)
 				{
