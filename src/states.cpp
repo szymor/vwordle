@@ -8,6 +8,7 @@
 #include <cctype>
 #include <map>
 #include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
 
 #ifdef WEBOS
 #include <emscripten.h>
@@ -97,6 +98,8 @@ void GameState::loadGfx()
 	keyboard_fg = IMG_Load(GFX_PATH "keyboard_fg.png");
 	letter_select = IMG_Load(GFX_PATH "digit_selection.png");
 	check_select = IMG_Load(GFX_PATH "rules_selection.png");
+
+	font = TTF_OpenFont(GFX_PATH "DejaVuSansMono.ttf", 12);
 }
 
 void GameState::unloadGfx()
@@ -119,6 +122,8 @@ void GameState::unloadGfx()
 	letter_select = nullptr;
 	SDL_FreeSurface(check_select);
 	check_select = nullptr;
+	TTF_CloseFont(font);
+	font = nullptr;
 }
 
 void GameState::loadDictionary(int letternum)
@@ -240,7 +245,7 @@ void GameState::draw()
 		{
 			int x = (SCREEN_WIDTH - word_size * SPRITE_SIZE) / 2 + i * SPRITE_SIZE;
 			int y = j * SPRITE_SIZE;
-			if (j == wrong_guesses && i == active_letter)
+			if (j == wrong_guesses && i == active_letter && GS_WON != gamestatus)
 				drawBox(x, y, BT_ACTIVE);
 			else
 				drawBox(x, y, bts[j][i]);
@@ -258,6 +263,20 @@ void GameState::draw()
 		dst.x = 0;
 		dst.y = 25;
 		SDL_BlitSurface(win_dialog, NULL, screen, &dst);
+
+		const char won_strings[6][32] = {
+			"Lucky or cheaty? :)",
+			"You are a genius!",
+			"Incredible vocabulary!",
+			"Amazing skill!",
+			"Good job!",
+			"Nice guess!"
+		};
+		SDL_Surface *text = TTF_RenderUTF8_Blended(font, won_strings[wrong_guesses], (SDL_Color){ 255, 255, 255 });
+		dst.x = 104 + (180 - text->w) / 2;
+		dst.y += 92;
+		SDL_BlitSurface(text, NULL, screen, &dst);
+		SDL_FreeSurface(text);
 	}
 	else if (GS_LOST == gamestatus)
 	{
@@ -346,7 +365,6 @@ void GameState::verifyInputWord()
 		}
 		if (word_size == correct_letters)
 		{
-			wrong_guesses = MAX_WRONG_GUESSES; // do not display the red box
 			gamestatus = GS_WON;
 		}
 		else

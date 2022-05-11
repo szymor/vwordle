@@ -4,6 +4,7 @@
 #include <string>
 #include <set>
 #include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 
 #define MIN_WORD_SIZE				(5)
 #define MAX_WORD_SIZE				(8)
@@ -46,6 +47,7 @@ private:
 		GS_VIRTUAL_KEYBOARD
 	};
 
+	TTF_Font *font = nullptr;
 	SDL_Surface *bg = nullptr;
 	SDL_Surface *gfx = nullptr;
 	SDL_Surface *unknown_word_dialog = nullptr;

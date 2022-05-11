@@ -4,6 +4,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_mixer.h>
+#include <SDL/SDL_ttf.h>
 #include "global.hpp"
 #include "states.hpp"
 #include "sound.hpp"
@@ -21,6 +22,8 @@ int main(int argc, char *argv[])
 	Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
 	Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 1, 1024);
 	loadSounds();
+
+	TTF_Init();
 
 	while (SI_QUIT != stateid)
 	{
@@ -53,6 +56,7 @@ int main(int argc, char *argv[])
 	}
 
 	unloadSounds();
+	TTF_Quit();
 	SDL_Quit();
 	return 0;
 }
