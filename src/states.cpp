@@ -283,6 +283,24 @@ void GameState::draw()
 		dst.x = 0;
 		dst.y = 25;
 		SDL_BlitSurface(lose_dialog, NULL, screen, &dst);
+
+		SDL_Surface *text = TTF_RenderUTF8_Blended(font, "Not this time...", (SDL_Color){ 255, 255, 255 });
+		dst.x = 104 + (180 - text->w) / 2;
+		dst.y += 91 - 16;
+		SDL_BlitSurface(text, NULL, screen, &dst);
+		SDL_FreeSurface(text);
+
+		text = TTF_RenderUTF8_Blended(font, "The winning word is", (SDL_Color){ 255, 255, 255 });
+		dst.x = 104 + (180 - text->w) / 2;
+		dst.y += 17;
+		SDL_BlitSurface(text, NULL, screen, &dst);
+		SDL_FreeSurface(text);
+
+		text = TTF_RenderUTF8_Blended(font, word_to_guess.c_str(), (SDL_Color){ 255, 255, 255 });
+		dst.x = 104 + (180 - text->w) / 2;
+		dst.y += 17;
+		SDL_BlitSurface(text, NULL, screen, &dst);
+		SDL_FreeSurface(text);
 	}
 	else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 	{
