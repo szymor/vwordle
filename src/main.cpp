@@ -24,6 +24,9 @@ int main(int argc, char *argv[])
 	loadSounds();
 
 	TTF_Init();
+	menustate.loadGfx();
+	gamestate.loadGfx();
+	rulesstate.loadGfx();
 
 	while (SI_QUIT != stateid)
 	{
@@ -31,23 +34,21 @@ int main(int argc, char *argv[])
 		{
 			case SI_MENU:
 				setVolume(VOL_HALF);
-				menustate.loadGfx();
 				menustate.processAll();
-				menustate.unloadGfx();
+				if (SI_GAME == stateid)
+				{
+					// switched to the game state
+					gamestate.loadDictionary(menustate.getWordLength());
+				}
 				break;
 			case SI_GAME:
 				playMusic();
 				setVolume(VOL_FULL);
-				gamestate.loadGfx();
-				gamestate.loadDictionary(menustate.getWordLength());
 				gamestate.resetGame();
 				gamestate.processAll();
-				gamestate.unloadGfx();
 				break;
 			case SI_RULES:
-				rulesstate.loadGfx();
 				rulesstate.processAll();
-				rulesstate.unloadGfx();
 				break;
 			case SI_QUIT:
 				// no action
@@ -55,6 +56,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	rulesstate.unloadGfx();
+	gamestate.unloadGfx();
+	menustate.unloadGfx();
 	unloadSounds();
 	TTF_Quit();
 	SDL_Quit();

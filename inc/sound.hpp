@@ -2,7 +2,7 @@
 #define _HPP_SOUND
 
 #define VOL_FULL	(MIX_MAX_VOLUME / 9)
-#define VOL_HALF	(MIX_MAX_VOLUME / 18)
+#define VOL_HALF	(MIX_MAX_VOLUME / 27)
 #define VOL_MUTE	(0)
 
 void loadSounds();
