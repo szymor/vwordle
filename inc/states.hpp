@@ -78,8 +78,17 @@ private:
 	void drawBox(int x, int y, BoxType bt);
 	SDL_Surface *newColoredKeyboard();
 	void verifyInputWord();
-	void incrementActiveLetter();
-	void decrementActiveLetter();
+	void moveActiveLetterLeft();
+	void moveActiveLetterRight();
+	void moveKeyboardPointerLeft();
+	void moveKeyboardPointerRight();
+	void moveKeyboardPointerUp();
+	void moveKeyboardPointerDown();
+	void changeActiveLetterUp();
+	void changeActiveLetterDown();
+	void pressVirtualKey();
+	void fillActiveLetterFromAbove();
+	void fillActiveLetterWithNextYellowCandidate();
 public:
 	void loadGfx();
 	void unloadGfx();

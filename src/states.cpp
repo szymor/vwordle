@@ -411,7 +411,7 @@ void GameState::verifyInputWord()
 	}
 }
 
-void GameState::decrementActiveLetter()
+void GameState::moveActiveLetterLeft()
 {
 	playSilentClick();
 	if (active_letter > 0)
@@ -420,7 +420,7 @@ void GameState::decrementActiveLetter()
 	}
 }
 
-void GameState::incrementActiveLetter()
+void GameState::moveActiveLetterRight()
 {
 	playSilentClick();
 	if (active_letter < (word_size - 1))
@@ -429,11 +429,134 @@ void GameState::incrementActiveLetter()
 	}
 }
 
+void GameState::moveKeyboardPointerLeft()
+{
+	--keyx;
+	if (keyx < 0)
+	{
+		switch(keyy)
+		{
+			case 0: keyx = MAX_KEYNUM_0_ID; break;
+			case 1: keyx = MAX_KEYNUM_1_ID; break;
+			case 2: keyx = MAX_KEYNUM_2_ID; break;
+		}
+	}
+}
+
+void GameState::moveKeyboardPointerRight()
+{
+	++keyx;
+	if ((0 == keyy && keyx > MAX_KEYNUM_0_ID) ||
+		(1 == keyy && keyx > MAX_KEYNUM_1_ID) ||
+		(2 == keyy && keyx > MAX_KEYNUM_2_ID))
+		keyx = 0;
+}
+
+void GameState::moveKeyboardPointerUp()
+{
+	if (keyy > 0)
+	{
+		--keyy;
+		if (0 == keyy && keyx > MAX_KEYNUM_0_ID)
+		{
+			keyx = MAX_KEYNUM_0_ID;
+		}
+		else if (1 == keyy && keyx > MAX_KEYNUM_1_ID)
+		{
+			keyx = MAX_KEYNUM_1_ID;
+		}
+		else if (2 == keyy && keyx > MAX_KEYNUM_2_ID)
+		{
+			keyx = MAX_KEYNUM_2_ID;
+		}
+	}
+}
+
+void GameState::moveKeyboardPointerDown()
+{
+	if (keyy < 2)
+	{
+		++keyy;
+		if (0 == keyy && keyx > MAX_KEYNUM_0_ID)
+		{
+			keyx = MAX_KEYNUM_0_ID;
+		}
+		else if (1 == keyy && keyx > MAX_KEYNUM_1_ID)
+		{
+			keyx = MAX_KEYNUM_1_ID;
+		}
+		else if (2 == keyy && keyx > MAX_KEYNUM_2_ID)
+		{
+			keyx = MAX_KEYNUM_2_ID;
+		}
+	}
+}
+
+void GameState::changeActiveLetterUp()
+{
+	char &letter = letters[wrong_guesses][active_letter];
+	if (letter < 'A' || letter > 'Z')
+		letter = 'Z';
+	else
+		--letter;
+}
+
+void GameState::changeActiveLetterDown()
+{
+	char &letter = letters[wrong_guesses][active_letter];
+	if (letter < 'A' || letter > 'Z')
+		letter = 'A';
+	else
+		++letter;
+}
+
+void GameState::pressVirtualKey()
+{
+	if (CHECK_POS_X == keyx && CHECK_POS_Y == keyy)     // 'check' key
+	{
+		verifyInputWord();
+	}
+	else
+	{
+		char &letter = letters[wrong_guesses][active_letter];
+		letter = keys[keyy][keyx];
+		moveActiveLetterRight();
+	}
+}
+
+void GameState::fillActiveLetterFromAbove()
+{
+	if (wrong_guesses > 0)
+	{
+		letters[wrong_guesses][active_letter] = letters[wrong_guesses - 1][active_letter];
+	}
+}
+
+void GameState::fillActiveLetterWithNextYellowCandidate()
+{
+	// find the next yellow letter if any
+	auto it = yellows.find(letters[wrong_guesses][active_letter]);
+	if (it != yellows.end())
+	{
+		++it;
+		if (it == yellows.end())
+			it = yellows.begin();
+	}
+	else
+	{
+		it = yellows.begin();
+	}
+	// if any successor exists, assign it
+	if (it != yellows.end())
+	{
+		letters[wrong_guesses][active_letter] = *it;
+	}
+}
+
 void GameState::processInput()
 {
 	SDL_Event event;
-	bool leave = false;
-	if (SDL_WaitEvent(&event) && !leave)
+	if (SDL_WaitEvent(&event))
 	{
 		switch (event.type)
 		{
@@ -452,103 +575,44 @@ void GameState::processInput()
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
-							decrementActiveLetter();
-							leave = true;
+							moveActiveLetterLeft();
 						}
 						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 						{
-							--keyx;
-							if (keyx < 0)
-							{
-								switch(keyy)
-								{
-									case 0: keyx = MAX_KEYNUM_0_ID; break;
-									case 1: keyx = MAX_KEYNUM_1_ID; break;
-									case 2: keyx = MAX_KEYNUM_2_ID; break;
-								}
-							}
-							leave = true;
+							moveKeyboardPointerLeft();
 						}
 					} break;
 					case SDLK_RIGHT:
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
-							incrementActiveLetter();
-							leave = true;
+							moveActiveLetterRight();
 						}
 						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 						{
-							++keyx;
-							if ((0 == keyy && keyx > MAX_KEYNUM_0_ID) ||
-								(1 == keyy && keyx > MAX_KEYNUM_1_ID) ||
-								(2 == keyy && keyx > MAX_KEYNUM_2_ID))
-								keyx = 0;
-							leave = true;
+							moveKeyboardPointerRight();
 						}
 					} break;
 					case SDLK_UP:
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
-							char &letter = letters[wrong_guesses][active_letter];
-							if (letter < 'A' || letter > 'Z')
-								letter = 'Z';
-							else
-								--letter;
-							leave = true;
+							changeActiveLetterUp();
 						}
 						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 						{
-							if (keyy > 0)
-							{
-								--keyy;
-								if (0 == keyy && keyx > MAX_KEYNUM_0_ID)
-								{
-									keyx = MAX_KEYNUM_0_ID;
-								}
-								else if (1 == keyy && keyx > MAX_KEYNUM_1_ID)
-								{
-									keyx = MAX_KEYNUM_1_ID;
-								}
-								else if (2 == keyy && keyx > MAX_KEYNUM_2_ID)
-								{
-									keyx = MAX_KEYNUM_2_ID;
-								}
-								leave = true;
-							}
+							moveKeyboardPointerUp();
 						}
 					} break;
 					case SDLK_DOWN:
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
-							char &letter = letters[wrong_guesses][active_letter];
-							if (letter < 'A' || letter > 'Z')
-								letter = 'A';
-							else
-								++letter;
-							leave = true;
+							changeActiveLetterDown();
 						}
 						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 						{
-							if (keyy < 2)
-							{
-								++keyy;
-								if (0 == keyy && keyx > MAX_KEYNUM_0_ID)
-								{
-									keyx = MAX_KEYNUM_0_ID;
-								}
-								else if (1 == keyy && keyx > MAX_KEYNUM_1_ID)
-								{
-									keyx = MAX_KEYNUM_1_ID;
-								}
-								else if (2 == keyy && keyx > MAX_KEYNUM_2_ID)
-								{
-									keyx = MAX_KEYNUM_2_ID;
-								}
-								leave = true;
-							}
+							moveKeyboardPointerDown();
 						}
 					} break;
 					case KEY_L1:
@@ -556,8 +620,7 @@ void GameState::processInput()
 						if ((GS_INPROGRESS == gamestatus) ||
 							(GS_VIRTUAL_KEYBOARD == gamestatus))
 						{
-							decrementActiveLetter();
-							leave = true;
+							moveActiveLetterLeft();
 						}
 					} break;
 					case KEY_R1:
@@ -565,8 +628,7 @@ void GameState::processInput()
 						if ((GS_INPROGRESS == gamestatus) ||
 							(GS_VIRTUAL_KEYBOARD == gamestatus))
 						{
-							incrementActiveLetter();
-							leave = true;
+							moveActiveLetterRight();
 						}
 					} break;
 					case KEY_START:
@@ -594,7 +656,6 @@ void GameState::processInput()
 							gamestatus = GS_INPROGRESS;
 							default_input_mode = gamestatus;
 						}
-						leave = true;
 					} break;
 					case KEY_A:
 					{
@@ -604,63 +665,31 @@ void GameState::processInput()
 						}
 						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 						{
-							if (CHECK_POS_X == keyx && CHECK_POS_Y == keyy)     // 'check' key
-							{
-								verifyInputWord();
-							}
-							else
-							{
-								char &letter = letters[wrong_guesses][active_letter];
-								letter = keys[keyy][keyx];
-								incrementActiveLetter();
-							}
+							pressVirtualKey();
 						}
 					} break;
 					case KEY_B:
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
-							if (wrong_guesses > 0)
-							{
-								letters[wrong_guesses][active_letter] = letters[wrong_guesses - 1][active_letter];
-								leave = true;
-							}
+							fillActiveLetterFromAbove();
 						}
 					} break;
 					case KEY_Y:
 					{
 						if (GS_INPROGRESS == gamestatus)
 						{
-							// find the next yellow letter if any
-							auto it = yellows.find(letters[wrong_guesses][active_letter]);
-							if (it != yellows.end())
-							{
-								++it;
-								if (it == yellows.end())
-									it = yellows.begin();
-							}
-							else
-							{
-								it = yellows.begin();
-							}
-							// if any successor exists, assign it
-							if (it != yellows.end())
-							{
-								letters[wrong_guesses][active_letter] = *it;
-								leave = true;
-							}
+							fillActiveLetterWithNextYellowCandidate();
 						}
 					} break;
 					case KEY_SELECT:
 					{
 						stateid = SI_MENU;
-						leave = true;
 					} break;
 				} break;
 			case SDL_QUIT:
 			{
 				stateid = SI_QUIT;
-				leave = true;
 			} break;
 		}
 	}
@@ -727,8 +756,7 @@ void MenuState::draw()
 void MenuState::processInput()
 {
 	SDL_Event event;
-	bool leave = false;
-	if (SDL_WaitEvent(&event) && !leave)
+	if (SDL_WaitEvent(&event))
 	{
 		switch (event.type)
 		{
@@ -742,7 +770,6 @@ void MenuState::processInput()
 							if (word_length > MIN_WORD_SIZE)
 							{
 								--word_length;
-								leave = true;
 							}
 						}
 					} break;
@@ -753,7 +780,6 @@ void MenuState::processInput()
 							if (word_length < MAX_WORD_SIZE)
 							{
 								++word_length;
-								leave = true;
 							}
 						}
 					} break;
@@ -762,7 +788,6 @@ void MenuState::processInput()
 						if (index > 0)
 						{
 							--index;
-							leave = true;
 						}
 					} break;
 					case SDLK_DOWN:
@@ -770,7 +795,6 @@ void MenuState::processInput()
 						if (index < MAX_ENTRY_ID)
 						{
 							++index;
-							leave = true;
 						}
 					} break;
 					case KEY_START:
@@ -779,18 +803,15 @@ void MenuState::processInput()
 							stateid = SI_GAME;
 						else if (1 == index)
 							stateid = SI_RULES;
-						leave = true;
 					} break;
 					case KEY_SELECT:
 					{
 						stateid = SI_QUIT;
-						leave = true;
 					} break;
 				} break;
 			case SDL_QUIT:
 			{
 				stateid = SI_QUIT;
-				leave = true;
 			} break;
 		}
 	}
@@ -821,8 +842,7 @@ void RulesState::draw()
 void RulesState::processInput()
 {
 	SDL_Event event;
-	bool leave = false;
-	if (SDL_WaitEvent(&event) && !leave)
+	if (SDL_WaitEvent(&event))
 	{
 		switch (event.type)
 		{
@@ -833,13 +853,11 @@ void RulesState::processInput()
 					case KEY_SELECT:
 					{
 						stateid = SI_MENU;
-						leave = true;
 					} break;
 				} break;
 			case SDL_QUIT:
 			{
 				stateid = SI_QUIT;
-				leave = true;
 			} break;
 		}
 	}
