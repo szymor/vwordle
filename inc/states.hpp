@@ -69,7 +69,8 @@ private:
 	std::set<char> greens;
 	std::set<char> yellows;
 	std::set<char> grays;
-	GameStatus gamestatus = GS_INPROGRESS;
+	GameStatus gamestatus = GS_VIRTUAL_KEYBOARD;
+	GameStatus default_input_mode = GS_VIRTUAL_KEYBOARD;
 
 	static Uint32 closePopupCb(Uint32 interval, void *param);
 	virtual StateId getMyStateId();

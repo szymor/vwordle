@@ -159,7 +159,7 @@ void GameState::resetGame()
 	active_letter = 0;
 	keyx = 0;
 	keyy = 0;
-	gamestatus = GS_INPROGRESS;
+	gamestatus = default_input_mode;
 	greens.clear();
 	yellows.clear();
 	grays.clear();
@@ -442,7 +442,7 @@ void GameState::processInput()
 				if (GS_UNKNOWN_WORD == gamestatus)
 				{
 					active_letter = 0;
-					gamestatus = GS_INPROGRESS;
+					gamestatus = default_input_mode;
 				}
 			} break;
 			case SDL_KEYDOWN:
@@ -574,7 +574,7 @@ void GameState::processInput()
 						if (GS_UNKNOWN_WORD == gamestatus)
 						{
 							active_letter = 0;
-							gamestatus = GS_INPROGRESS;
+							gamestatus = default_input_mode;
 						}
 						else if (GS_WON == gamestatus)
 						{
@@ -587,10 +587,12 @@ void GameState::processInput()
 						else if (GS_INPROGRESS == gamestatus)
 						{
 							gamestatus = GS_VIRTUAL_KEYBOARD;
+							default_input_mode = gamestatus;
 						}
 						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 						{
 							gamestatus = GS_INPROGRESS;
+							default_input_mode = gamestatus;
 						}
 						leave = true;
 					} break;
