@@ -13,6 +13,7 @@
 #ifdef WEBOS
 #include <emscripten.h>
 #define SDL_WaitEvent SDL_PollEvent
+#define TTF_RenderUTF8_Blended TTF_RenderUTF8_Solid
 #endif
 
 #define POPUP_TIMEOUT       (2000)
@@ -615,6 +616,34 @@ void GameState::processInput()
 							moveKeyboardPointerDown();
 						}
 					} break;
+#ifdef WEBOS
+					case KEY_OK:
+					{
+						if (GS_UNKNOWN_WORD == gamestatus)
+						{
+							active_letter = 0;
+							gamestatus = default_input_mode;
+							SDL_RemoveTimer(popup_timer);
+							popup_timer = 0;
+						}
+						else if (GS_WON == gamestatus)
+						{
+							stateid = SI_MENU;
+						}
+						else if (GS_LOST == gamestatus)
+						{
+							stateid = SI_MENU;
+						}
+						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
+						{
+							pressVirtualKey();
+						}
+					} break;
+					case KEY_BACK:
+					{
+						stateid = SI_MENU;
+					} break;
+#else
 					case KEY_L1:
 					{
 						if ((GS_INPROGRESS == gamestatus) ||
@@ -688,6 +717,7 @@ void GameState::processInput()
 					{
 						stateid = SI_MENU;
 					} break;
+#endif
 				} break;
 			case SDL_QUIT:
 			{
@@ -799,14 +829,22 @@ void MenuState::processInput()
 							++index;
 						}
 					} break;
+#ifdef WEBOS
+					case KEY_OK:
+#else
 					case KEY_START:
+#endif
 					{
 						if (0 == index)
 							stateid = SI_GAME;
 						else if (1 == index)
 							stateid = SI_RULES;
 					} break;
+#ifdef WEBOS
+					case KEY_BACK:
+#else
 					case KEY_SELECT:
+#endif
 					{
 						stateid = SI_QUIT;
 					} break;
@@ -851,8 +889,13 @@ void RulesState::processInput()
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym)
 				{
+#ifdef WEBOS
+					case KEY_OK:
+					case KEY_BACK:
+#else
 					case KEY_START:
 					case KEY_SELECT:
+#endif
 					{
 						stateid = SI_MENU;
 					} break;

@@ -25,6 +25,9 @@
 #define KEY_SELECT	SDLK_ESCAPE
 #define KEY_L1		SDLK_TAB
 #define KEY_R1		SDLK_BACKSPACE
+#elif defined(WEBOS)
+#define KEY_OK		SDLK_RETURN
+#define KEY_BACK	SDLK_BACKSPACE
 #else
 #define KEY_A		SDLK_LALT
 #define KEY_B		SDLK_LCTRL
