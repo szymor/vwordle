@@ -71,6 +71,7 @@ private:
 	std::set<char> grays;
 	GameStatus gamestatus = GS_VIRTUAL_KEYBOARD;
 	GameStatus default_input_mode = GS_VIRTUAL_KEYBOARD;
+	SDL_TimerID popup_timer = nullptr;
 
 	static Uint32 closePopupCb(Uint32 interval, void *param);
 	virtual StateId getMyStateId();

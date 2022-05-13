@@ -360,7 +360,7 @@ void GameState::verifyInputWord()
 	if (dict.count(word) == 0)
 	{
 		gamestatus = GS_UNKNOWN_WORD;
-		SDL_AddTimer(POPUP_TIMEOUT, closePopupCb, NULL);
+		popup_timer = SDL_AddTimer(POPUP_TIMEOUT, closePopupCb, NULL);
 	}
 	else
 	{
@@ -637,6 +637,8 @@ void GameState::processInput()
 						{
 							active_letter = 0;
 							gamestatus = default_input_mode;
+							SDL_RemoveTimer(popup_timer);
+							popup_timer = nullptr;
 						}
 						else if (GS_WON == gamestatus)
 						{
