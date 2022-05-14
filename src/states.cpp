@@ -619,14 +619,7 @@ void GameState::processInput()
 #ifdef WEBOS
 					case KEY_OK:
 					{
-						if (GS_UNKNOWN_WORD == gamestatus)
-						{
-							active_letter = 0;
-							gamestatus = default_input_mode;
-							SDL_RemoveTimer(popup_timer);
-							popup_timer = 0;
-						}
-						else if (GS_WON == gamestatus)
+						if (GS_WON == gamestatus)
 						{
 							stateid = SI_MENU;
 						}
@@ -637,6 +630,34 @@ void GameState::processInput()
 						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 						{
 							pressVirtualKey();
+						}
+					} break;
+					case KEY_RED:
+					{
+						if (GS_VIRTUAL_KEYBOARD == gamestatus)
+						{
+							moveActiveLetterLeft();
+						}
+					} break;
+					case KEY_GREEN:
+					{
+						if (GS_VIRTUAL_KEYBOARD == gamestatus)
+						{
+							fillActiveLetterFromAbove();
+						}
+					} break;
+					case KEY_YELLOW:
+					{
+						if (GS_VIRTUAL_KEYBOARD == gamestatus)
+						{
+							fillActiveLetterWithNextYellowCandidate();
+						}
+					} break;
+					case KEY_BLUE:
+					{
+						if (GS_VIRTUAL_KEYBOARD == gamestatus)
+						{
+							moveActiveLetterRight();
 						}
 					} break;
 					case KEY_BACK:

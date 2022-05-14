@@ -9,6 +9,10 @@
 #include "states.hpp"
 #include "sound.hpp"
 
+#ifdef WEBOS
+#include <emscripten.h>
+#endif
+
 SDL_Surface *screen = nullptr;
 
 int main(int argc, char *argv[])
@@ -40,6 +44,13 @@ int main(int argc, char *argv[])
 					// switched to the game state
 					gamestate.loadDictionary(menustate.getWordLength());
 				}
+#ifdef WEBOS
+				else if (SI_QUIT == stateid)
+				{
+					EM_ASM(webOS.platformBack(););
+					stateid = SI_MENU;
+				}
+#endif
 				break;
 			case SI_GAME:
 				playMusic();

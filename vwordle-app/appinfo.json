@@ -8,5 +8,6 @@
   "icon": "icon.png",
   "largeIcon": "largeIcon.png",
   "splashBackground": "splash.png",
-  "iconColor": "black"
+  "iconColor": "black",
+  "disableBackHistoryAPI": true
 }

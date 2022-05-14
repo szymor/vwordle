@@ -27,7 +27,11 @@
 #define KEY_R1		SDLK_BACKSPACE
 #elif defined(WEBOS)
 #define KEY_OK		SDLK_RETURN
-#define KEY_BACK	SDLK_BACKSPACE
+#define KEY_BACK	461
+#define KEY_RED		403
+#define KEY_GREEN	404
+#define KEY_YELLOW	405
+#define KEY_BLUE	406
 #else
 #define KEY_A		SDLK_LALT
 #define KEY_B		SDLK_LCTRL

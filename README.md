@@ -9,7 +9,13 @@ Tile types:
 - gray - a letter is not in the word in any spot.
 
 ## hardware requirements
-The game was created with retro handhelds (Miyoo, RetroFW, OpenDingux, etc.) in mind, so it should run properly on any device supporting 320x240 resolution.
+The game was created with retro handhelds in mind, so it should run properly on any device supporting 320x240 resolution.
+
+At the moment the game has been ported to the following platforms:
+- MiyooCFW (Bittboy, PocketGo, Powkiddy V90, etc.),
+- RetroFW (RS97, LDK, RG300, etc.),
+- LG WebOS 5.0 and above.
+
 ## license
 The source code of the game is licensed under GNU GPL 3.0 by vamastah.
 
