@@ -1,4 +1,3 @@
 - przejrzec slowniki i powykreslac slowa nieznane przecietnej osobie - do przemyslenia
-- muzyka przestaje grac po jednym razie na bittboyu (brak reprodukcji na kompie) - czeba naprawic
 - bardziej szczegolowe instrukcje - dac wiecej stron np o klawiszologii
 - rozne wersje jezykowe gry

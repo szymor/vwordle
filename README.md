@@ -14,7 +14,11 @@ The game was created with retro handhelds in mind, so it should run properly on 
 At the moment the game has been ported to the following platforms:
 - MiyooCFW (Bittboy, PocketGo, Powkiddy V90, etc.),
 - RetroFW (RS97, LDK, RG300, etc.),
-- LG WebOS 5.0 and above.
+- LG webOS TV 4.0 and above.
+
+## known issues
+- [MiyooCFW] background music plays once and then stops playing.
+- [LG webOS TV 4.0/5.0] visual flickering and instability. The game works fine on webOS TV 6.0 and 22.
 
 ## license
 The source code of the game is licensed under GNU GPL 3.0 by vamastah.
