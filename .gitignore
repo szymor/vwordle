@@ -1,6 +1,7 @@
 vwordle
 *.opk
 *.ipk
+*.zip
 vwordle.data
 vwordle.html
 vwordle.js

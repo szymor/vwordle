@@ -1,6 +1,7 @@
 .PHONY: all clean
 
 PROJECT=vwordle
+ZIP=$(PROJECT).zip
 SRCPATH=src
 INCPATH=inc
 SRC=main.cpp states.cpp sound.cpp
@@ -9,13 +10,16 @@ INC=global.hpp states.hpp sound.hpp
 INC:=$(addprefix $(INCPATH)/, $(INC))
 CXX=arm-linux-g++
 PKGCONF=$(shell $(CXX) --print-sysroot)/../../bin/pkg-config
-CFLAGS=$(shell $(PKGCONF) --cflags sdl SDL_image SDL_mixer) -I$(INCPATH) -Ofast -march=armv5te -mtune=arm926ej-s -DMIYOO
-LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image SDL_mixer) -ljpeg -lpng -lz -logg
+CFLAGS=$(shell $(PKGCONF) --cflags sdl SDL_image SDL_mixer SDL_ttf) -I$(INCPATH) -Ofast -march=armv5te -mtune=arm926ej-s -DMIYOO
+LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image SDL_mixer SDL_ttf) -ljpeg -lpng -lz -logg -lfreetype -lbz2
 
-all: $(PROJECT)
+all: $(ZIP)
 
 $(PROJECT): $(SRC) $(INC)
 	$(CXX) -o $(PROJECT) $(CFLAGS) $(SRC) $(LFLAGS)
 
+$(ZIP): $(PROJECT) gfx dict music sfx icon.png README.md LICENSE.md cc010.txt ccby40.txt
+	zip -r $@ $^
+
 clean:
-	rm -rf $(PROJECT)
+	rm -rf $(PROJECT) $(ZIP)
