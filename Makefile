@@ -14,7 +14,7 @@ LFLAGS=$(shell pkg-config --libs sdl SDL_image SDL_mixer SDL_ttf)
 all: $(PROJECT)
 
 $(PROJECT): $(SRC) $(INC)
-	$(CXX) -o $(PROJECT) $(CFLAGS) $(SRC) $(LFLAGS)
+	$(CXX) -o $(PROJECT) $(CFLAGS) $(SRC) $(LFLAGS) -lsqlite3
 
 clean:
 	rm -rf $(PROJECT)
