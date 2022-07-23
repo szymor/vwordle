@@ -31,3 +31,13 @@ https://freesound.org/
 
 The click2 sound is licensed under CC0 1.0 by errysn.
 https://freesound.org/
+
+The word definitions are from wordset-dictionary founded by Hampton Lintorn Catlin and Michael Lintorn Catlin.
+https://github.com/wordset/wordset-dictionary
+
+## word definitions
+database: sqlite3
+database table: definitions
+every column in table is text type.
+format of defintions table:
+	word | def1 | speech_part1 | def2 | speech_part2 
