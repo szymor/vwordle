@@ -37,7 +37,11 @@ https://github.com/wordset/wordset-dictionary
 
 ## word definitions
 database: sqlite3
+
 database table: definitions
+
 every column in table is text type.
+
 format of defintions table:
+
 	word | def1 | speech_part1 | def2 | speech_part2 
