@@ -58,7 +58,6 @@ private:
 	SDL_Surface *check_select = nullptr;
 	SDL_Surface *keyboard_bg = nullptr;
 	SDL_Surface *keyboard_fg = nullptr;
-	SDL_Surface* word_definition_bg = nullptr;
 	char letters[MAX_WRONG_GUESSES][MAX_WORD_SIZE];
 	BoxType bts[MAX_WRONG_GUESSES][MAX_WORD_SIZE];
 	int wrong_guesses = 0;
@@ -66,7 +65,7 @@ private:
 	int word_size = 5;
 	int keyx = 0;
 	int keyy = 0;
-	std::string winning_word;
+	int active_definition = 0;
 	std::string word_to_guess;
 	std::set<std::string> dict;
 	std::set<char> greens;
