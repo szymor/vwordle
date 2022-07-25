@@ -105,7 +105,6 @@ void GameState::loadGfx()
 	keyboard_fg = IMG_Load(GFX_PATH "keyboard_fg.png");
 	letter_select = IMG_Load(GFX_PATH "digit_selection.png");
 	check_select = IMG_Load(GFX_PATH "rules_selection.png");
-	word_definition_bg = IMG_Load(GFX_PATH "worddefbg.png");
 	font = TTF_OpenFont(GFX_PATH "DejaVuSansMono.ttf", 12);
 }
 
@@ -129,8 +128,6 @@ void GameState::unloadGfx()
 	letter_select = nullptr;
 	SDL_FreeSurface(check_select);
 	check_select = nullptr;
-	SDL_FreeSurface(word_definition_bg);
-	word_definition_bg = nullptr;
 	TTF_CloseFont(font);
 	font = nullptr;
 }
@@ -156,7 +153,7 @@ void GameState::loadDictionary(int letternum)
 	std::cout << "Loaded " << dict.size() << " words." << std::endl;
 }
 
-static int callback(void* data, int argc, char** argv, char** azColName)
+static int sqlite3QuerySelectCallback(void* data, int argc, char** argv, char** azColName)
 {
 	fprintf(stderr, "%s: ", (const char*)data);
 
@@ -186,7 +183,7 @@ void GameState::loadWinningWordDefinition()
 		std::cout << "Opened Database Successfully" << std::endl;
 	}
 
-	int rc = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), NULL);
+	int rc = sqlite3_exec(db, sql.c_str(), sqlite3QuerySelectCallback, (void*)data.c_str(), NULL);
 	if (rc != SQLITE_OK)
 	{
 		std::cerr << "Error SELECT " << std::endl;
@@ -342,13 +339,13 @@ void GameState::draw()
 
 		SDL_Surface *text = TTF_RenderUTF8_Blended(font, "Not this time...", (SDL_Color){ 255, 255, 255 });
 		dst.x = 104 + (180 - text->w) / 2;
-		dst.y += 91 - 16;
+		dst.y += 91 - 20;
 		SDL_BlitSurface(text, NULL, screen, &dst);
 		SDL_FreeSurface(text);
 
 		text = TTF_RenderUTF8_Blended(font, "The winning word is", (SDL_Color){ 255, 255, 255 });
 		dst.x = 104 + (180 - text->w) / 2;
-		dst.y += 17;
+		dst.y += 13;
 		SDL_BlitSurface(text, NULL, screen, &dst);
 		SDL_FreeSurface(text);
 
@@ -360,8 +357,8 @@ void GameState::draw()
 		if (!word_definition_first.empty())
 		{
 			text = TTF_RenderUTF8_Blended(font, "Press A to check definition", (SDL_Color) { 255, 255, 255 });
-			dst.x = 104 + (180 - text->w) / 2;
-			dst.y += 20;
+			dst.x = 90 + (180 - text->w) / 2;
+			dst.y += 17;
 			SDL_BlitSurface(text, NULL, screen, &dst);
 			SDL_FreeSurface(text);
 		}
@@ -372,7 +369,7 @@ void GameState::draw()
 		{
 			dst.x = 0;
 			dst.y = 0;
-			SDL_BlitSurface(word_definition_bg, NULL, screen, &dst);
+			SDL_BlitSurface(bg, NULL, screen, &dst);
 			SDL_Surface* text = nullptr;
 			int i = 0;
 			std::string temp = "";
