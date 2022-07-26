@@ -1,6 +1,13 @@
 import json
 import sqlite3
 
+
+def createTable():
+    con = sqlite3.connect('definitions.db')
+    cur = con.cursor()
+    cur.execute("CREATE TABLE definitions(word text,def1 text,speech_part1 text,def2 text,speech_part2 text);")
+    con.commit()
+    con.close()
 def createDefinition(file):
     con = sqlite3.connect('definitions.db')
     cur = con.cursor()
@@ -35,6 +42,7 @@ def createDefinition(file):
         con.close()
                 
 if __name__ == "__main__":
+    createTable()
     dict_words_files  =  ['5.txt', '6.txt', '7.txt', '8.txt'] # replace with your word dictionary
     for f in dict_words_files:
         createDefinition(f)
