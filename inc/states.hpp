@@ -49,6 +49,7 @@ private:
 	};
 
 	TTF_Font *font = nullptr;
+	TTF_Font* font_bold = nullptr;
 	SDL_Surface *bg = nullptr;
 	SDL_Surface *gfx = nullptr;
 	SDL_Surface *unknown_word_dialog = nullptr;
