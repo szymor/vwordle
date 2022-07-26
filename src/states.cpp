@@ -106,6 +106,7 @@ void GameState::loadGfx()
 	letter_select = IMG_Load(GFX_PATH "digit_selection.png");
 	check_select = IMG_Load(GFX_PATH "rules_selection.png");
 	font = TTF_OpenFont(GFX_PATH "DejaVuSansMono.ttf", 12);
+	font_bold = TTF_OpenFont(GFX_PATH "DejaVuSansBold.ttf", 13);
 }
 
 void GameState::unloadGfx()
@@ -130,6 +131,8 @@ void GameState::unloadGfx()
 	check_select = nullptr;
 	TTF_CloseFont(font);
 	font = nullptr;
+	TTF_CloseFont(font_bold);
+	font_bold = nullptr;
 }
 
 void GameState::loadDictionary(int letternum)
@@ -365,69 +368,72 @@ void GameState::draw()
 	}
 	if (GS_DEFINITION == gamestatus)
 	{
-		if (!word_definition_first.empty())
+		SDL_BlitSurface(bg, NULL, screen, &dst);
+		SDL_Surface* text = nullptr;
+		std::string temp = "";
+		dst.x = 0;
+		dst.y = 20;
+		text = TTF_RenderUTF8_Blended(font_bold, "word: ", (SDL_Color) { 255, 255, 255 });
+		dst.x = (180 - text->w) / 2 - 40;
+		SDL_BlitSurface(text, NULL, screen, &dst);
+		SDL_FreeSurface(text);
+
+		text = TTF_RenderUTF8_Blended(font, word_to_guess.c_str(), (SDL_Color) { 255, 255, 255 });
+		dst.x = 50 + (180 - text->w) / 2;
+		SDL_BlitSurface(text, NULL, screen, &dst);
+		SDL_FreeSurface(text);
+		if (active_definition == 1)
 		{
-			dst.x = 0;
-			dst.y = 0;
-			SDL_BlitSurface(bg, NULL, screen, &dst);
-			SDL_Surface* text = nullptr;
-			int i = 0;
-			std::string temp = "";
-			dst.x = 0;
-			dst.y = 20;
-
-			text = TTF_RenderUTF8_Blended(font, "word: ", (SDL_Color) { 255, 255, 255 });
-			dst.x = (180 - text->w) / 2 - 40;
-			SDL_BlitSurface(text, NULL, screen, &dst);
-			SDL_FreeSurface(text);
-
-			text = TTF_RenderUTF8_Blended(font, word_to_guess.c_str(), (SDL_Color) { 255, 255, 255 });
-			dst.x = 50 + (180 - text->w) / 2;
-			SDL_BlitSurface(text, NULL, screen, &dst);
-			SDL_FreeSurface(text);
-
-			text = TTF_RenderUTF8_Blended(font, "definition: ", (SDL_Color) { 255, 255, 255 });
-			dst.x = (180 - text->w) / 2 - 40;
-			dst.y += 20;
-			SDL_BlitSurface(text, NULL, screen, &dst);
-			SDL_FreeSurface(text);
-			for (auto ch : RenderTextWrap(word_definition_first, 40))
+			if (!word_definition_first.empty())
 			{
-				if (ch == '\n')
+
+				text = TTF_RenderUTF8_Blended(font_bold, "definition: ", (SDL_Color) { 255, 255, 255 });
+				dst.x = (180 - text->w) / 2 - 40;
+				dst.y += 20;
+				SDL_BlitSurface(text, NULL, screen, &dst);
+				SDL_FreeSurface(text);
+				for (auto ch : RenderTextWrap(word_definition_first, 40))
 				{
-					text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
-					dst.x = 50 + (180 - text->w) / 2;
-					dst.y += 20;
-					SDL_BlitSurface(text, NULL, screen, &dst);
-					SDL_FreeSurface(text);
-					temp.clear();
+					if (ch == '\n')
+					{
+						text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
+						dst.x = 50 + (180 - text->w) / 2;
+						dst.y += 20;
+						SDL_BlitSurface(text, NULL, screen, &dst);
+						SDL_FreeSurface(text);
+						temp.clear();
+					}
+					else
+					{
+						temp.push_back(ch);
+					}
 				}
-				else
-				{
-					temp.push_back(ch);
-				}
+				text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
+				dst.x = 30 + (180 - text->w) / 2;
+				dst.y += 20;
+				temp.clear();
+				SDL_BlitSurface(text, NULL, screen, &dst);
+				SDL_FreeSurface(text);
+
+				text = TTF_RenderUTF8_Blended(font_bold, "speech part: ", (SDL_Color) { 255, 255, 255 });
+				dst.x = (180 - text->w) / 2 - 40;
+				dst.y += 20;
+				SDL_BlitSurface(text, NULL, screen, &dst);
+				SDL_FreeSurface(text);
+
+				text = TTF_RenderUTF8_Blended(font, speech_part_first.c_str(), (SDL_Color) { 255, 255, 255 });
+				dst.x = 50 + (180 - text->w) / 2;
+				SDL_BlitSurface(text, NULL, screen, &dst);
+				SDL_FreeSurface(text);
 			}
-			text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
-			dst.x = 30 + (180 - text->w) / 2;
-			dst.y += 20;
-			temp.clear();
-			SDL_BlitSurface(text, NULL, screen, &dst);
-			SDL_FreeSurface(text);
-
-			text = TTF_RenderUTF8_Blended(font, "speech part: ", (SDL_Color) { 255, 255, 255 });
-			dst.x = (180 - text->w) / 2 - 40;
-			dst.y += 20;
-			SDL_BlitSurface(text, NULL, screen, &dst);
-			SDL_FreeSurface(text);
-
-			text = TTF_RenderUTF8_Blended(font, speech_part_first.c_str(), (SDL_Color) { 255, 255, 255 });
-			dst.x = 50 + (180 - text->w) / 2;
-			SDL_BlitSurface(text, NULL, screen, &dst);
-			SDL_FreeSurface(text);
-
+		}
+		if(active_definition == 2)
+		{
 			if (word_definition_second != "None" && speech_part_second != "None")
 			{
-				text = TTF_RenderUTF8_Blended(font, "definition: ", (SDL_Color) { 255, 255, 255 });
+				dst.x = 0;
+				dst.y = 20;
+				text = TTF_RenderUTF8_Blended(font_bold, "definition: ", (SDL_Color) { 255, 255, 255 });
 				dst.x = (180 - text->w) / 2 - 40;
 				dst.y += 20;
 				SDL_BlitSurface(text, NULL, screen, &dst);
@@ -455,7 +461,7 @@ void GameState::draw()
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
 
-				text = TTF_RenderUTF8_Blended(font, "speech part: ", (SDL_Color) { 255, 255, 255 });
+				text = TTF_RenderUTF8_Blended(font_bold, "speech part: ", (SDL_Color) { 255, 255, 255 });
 				dst.x = (180 - text->w) / 2 - 40;
 				dst.y += 20;
 				SDL_BlitSurface(text, NULL, screen, &dst);
@@ -865,6 +871,12 @@ void GameState::processInput()
 						{
 							moveActiveLetterLeft();
 						}
+						if (!word_definition_first.empty())
+						{
+							active_definition = 1;
+							gamestatus = GS_DEFINITION;
+						}
+
 					} break;
 					case KEY_R1:
 					{
@@ -872,6 +884,11 @@ void GameState::processInput()
 							(GS_VIRTUAL_KEYBOARD == gamestatus))
 						{
 							moveActiveLetterRight();
+						}
+						if (!word_definition_second.empty() && active_definition == 1)
+						{
+							active_definition = 2;
+							gamestatus = GS_DEFINITION;
 						}
 					} break;
 					case KEY_START:
@@ -911,7 +928,10 @@ void GameState::processInput()
 						if (GS_LOST == gamestatus)
 						{
 							if (!word_definition_first.empty())
+							{
+								active_definition = 1;
 								gamestatus = GS_DEFINITION;
+							}
 						}
 						else if (GS_INPROGRESS == gamestatus)
 						{
