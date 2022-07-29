@@ -377,13 +377,13 @@ void GameState::draw()
 		SDL_Surface* text = nullptr;
 		std::string temp = "";
 		text = TTF_RenderUTF8_Blended(font_bold, "word", (SDL_Color) { 255, 255, 255 });
-		dst.x = 80 + (180 - text->w) / 2;
+		dst.x = (SCREEN_WIDTH - text->w) / 2;
 		dst.y += 20;
 		SDL_BlitSurface(text, NULL, screen, &dst);
 		SDL_FreeSurface(text);
 
 		text = TTF_RenderUTF8_Blended(font, word_to_guess.c_str(), (SDL_Color) { 255, 255, 255 });
-		dst.x = 80 + (180 - text->w) / 2;
+		dst.x = (SCREEN_WIDTH - text->w) / 2;
 		dst.y += 20;
 		SDL_BlitSurface(text, NULL, screen, &dst);
 		SDL_FreeSurface(text);
@@ -392,17 +392,17 @@ void GameState::draw()
 			if (word_definition_first != "None" && speech_part_first != "None")
 			{
 
-				text = TTF_RenderUTF8_Blended(font_bold, "definition: ", (SDL_Color) { 255, 255, 255 });
-				dst.x = 80 + (180 - text->w) / 2;
+				text = TTF_RenderUTF8_Blended(font_bold, "definition", (SDL_Color) { 255, 255, 255 });
+				dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
-				for (auto ch : RenderTextWrap(word_definition_first, 40))
+				for (auto ch : RenderTextWrap(word_definition_first, 45))
 				{
 					if (ch == '\n')
 					{
 						text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
-						dst.x = 30;
+						dst.x = (SCREEN_WIDTH - text->w) / 2;
 						dst.y += 20;
 						SDL_BlitSurface(text, NULL, screen, &dst);
 						SDL_FreeSurface(text);
@@ -414,14 +414,14 @@ void GameState::draw()
 					}
 				}
 				text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
-				dst.x = 40 + (180 - text->w) / 2 ;
+				dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
 				temp.clear();
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
 
-				text = TTF_RenderUTF8_Blended(font_bold, "speech part: ", (SDL_Color) { 255, 255, 255 });
-				dst.x = 80 + (180 - text->w) / 2;;
+				text = TTF_RenderUTF8_Blended(font_bold, "speech part", (SDL_Color) { 255, 255, 255 });
+				dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
@@ -437,17 +437,17 @@ void GameState::draw()
 		{
 			if (word_definition_second != "None" && speech_part_second != "None")
 			{
-				text = TTF_RenderUTF8_Blended(font_bold, "definition: ", (SDL_Color) { 255, 255, 255 });
-				dst.x = 80 + (180 - text->w) / 2;
+				text = TTF_RenderUTF8_Blended(font_bold, "definition", (SDL_Color) { 255, 255, 255 });
+				dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
-				for (auto ch : RenderTextWrap(word_definition_second, 40))
+				for (auto ch : RenderTextWrap(word_definition_second, 45))
 				{
 					if (ch == '\n')
 					{
 						text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
-						dst.x = 30;
+						dst.x = (SCREEN_WIDTH - text->w) / 2;
 						dst.y += 20;
 						SDL_BlitSurface(text, NULL, screen, &dst);
 						SDL_FreeSurface(text);
@@ -459,20 +459,20 @@ void GameState::draw()
 					}
 				}
 				text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
-				dst.x = 40 + (180 - text->w) / 2;
+				dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
 				temp.clear();
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
 
-				text = TTF_RenderUTF8_Blended(font_bold, "speech part: ", (SDL_Color) { 255, 255, 255 });
-				dst.x = 80 + (180 - text->w) / 2;;
+				text = TTF_RenderUTF8_Blended(font_bold, "speech part", (SDL_Color) { 255, 255, 255 });
+				dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
 
 				text = TTF_RenderUTF8_Blended(font, speech_part_second.c_str(), (SDL_Color) { 255, 255, 255 });
-				dst.x = 150;
+				dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
