@@ -44,6 +44,4 @@
 #endif
 
 extern SDL_Surface *screen;
-extern TTF_FONT* font;
-extern TTF_FONT* font_bold;
 #endif

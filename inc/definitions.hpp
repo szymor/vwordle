@@ -2,28 +2,25 @@
 #include <string>
 #include <iostream>
 #include <vector>
-class Defintions
+class Definitions
 { 
 private:
-	std::string database_name = "dict/def/definitions.d";
+	std::string database_name = "dict/def/definitions.db";
 	std::vector<std::string> definitions;
 	std::vector<std::string> speech_parts;
 	std::vector<std::string> synonyms;
 	int max_definitions;
-	int current_definition = 1;
-	void GetDefinitionsAndOthers(std::string word);
+	int current_definition = 0;
+	void clearStores();
 	
-	static int sqlite3QuerySelectCallback(void* data, int argc, char** argv, char** azColName)
-	{
-		fprintf(stderr, "%s: ", (const char*)data);
-
-		if(azColName == "def1")
-			std::count << ""
-		return 0;
-	}
 
 public:
-	void ShowDefinition(SDL_Surface* screen, TTF_FONT* font);
+	int GetMaxDefinitionsNumber();
+	std::string GetSpeechPartForWordDefinition();
+	std::string GetSynonymsForWordDefinition();
+	std::string GetCurrentDefinition();
+	int getCurrentDefinitionId();
+	void GetDefinitionsAndOthers(std::string word);
 	void SetNextDefinition();
 	void SetPreviousDefinition();
 	std::vector<std::string> RenderTextWrap(std::string str, int pos);

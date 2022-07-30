@@ -1,11 +1,24 @@
 import json
 import sqlite3
-
-
 def createTable():
     con = sqlite3.connect('definitions.db')
     cur = con.cursor()
-    cur.execute("CREATE TABLE definitions(word text,def1 text,speech_part1 text,def2 text,speech_part2 text);")
+    sql = """
+        create table words(id integer primary key autoincrement, word text);
+        create table synonyms(synonym_id integer primary key autoincrement,synonym text,word_id integer,foreign key(word_id) references words(id));
+        create table speech_part(speechpart_id integer not null primary key,speech_part text);
+        create table definitions(definitions_id integer primary key autoincrement, definition text, word_id integer,speech_part_id integer,foreign key(word_id) references words(id),
+        foreign key(speech_part_id) references speech_part(speechpart_id));
+        insert into speech_part(speechpart_id,speech_part) values(1, 'verb');
+        insert into speech_part(speechpart_id,speech_part) values(2, 'noun');
+        insert into speech_part(speechpart_id,speech_part) values(3, 'pronoun');
+        insert into speech_part(speechpart_id,speech_part) values(4, 'adjective');
+        insert into speech_part(speechpart_id,speech_part) values(5, 'adverb');
+        insert into speech_part(speechpart_id,speech_part) values(6, 'preposition');
+        insert into speech_part(speechpart_id,speech_part) values(7, 'conjunction');
+        insert into speech_part(speechpart_id,speech_part) values(8, 'interjection');
+    """
+    cur.executescript(sql)
     con.commit()
     con.close()
 def createDefinition(file):
@@ -19,25 +32,25 @@ def createDefinition(file):
             with open(f[0]+".json", encoding="UTF-8") as source: 
                 data = json.load(source)
                 try:
-                    def1 = None
-                    def2 = None
-                    speech_part1 = None
-                    speech_part2 = None
                     word = data[f.strip("\n")]['word']
-                    for i in range(0,2):
-                        if i == 0:
-                            def1 = data[f.strip('\n')]['meanings'][0]['def']
-                            speech_part1 = data[f.strip('\n')]['meanings'][0]['speech_part']
-                            #print(data[f.strip('\n')]['meanings'][0]['def'])
-                        if i == 1:
-                            try:
-                                def2 = data[f.strip('\n')]['meanings'][1]['def']
-                                speech_part2 = data[f.strip('\n')]['meanings'][1]['speech_part']
-                            except:
-                                pass
-                    cur.execute(f"INSERT INTO definitions Values('{word}','{def1}','{speech_part1}','{def2}', '{speech_part2}');")
+                    cur.execute(f"insert into words(word) values ('{word}');")
+                    con.commit()
+                    for meaning in data[f.strip('\n')]['meanings']:
+                        cur.execute(f"select speechpart_id from speech_part where speech_part='{meaning['speech_part']}';")
+                        speech_part_id = cur.fetchone()
+                        cur.execute(f"select id from words where word='{word}'")
+                        word_id = cur.fetchone()
+                        print(word_id)
+                        print("eror")
+                        sql = f"insert into definitions(definition,word_id,speech_part_id) values('{meaning['def']}',{word_id[0]},{speech_part_id[0]});"
+                        cur.execute(sql)
+                        con.commit()
+                        if 'synonyms' in meaning:
+                            for synonym in meaning['synonyms']:
+                                cur.execute(f"insert into synonyms(synonym, word_id) values ('{synonym}', {word_id[0]})")
+                                con.commit()
                 except:
-                    pass
+                    print("error")
                 con.commit()
         con.close()
                 

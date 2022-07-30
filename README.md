@@ -38,10 +38,10 @@ https://github.com/wordset/wordset-dictionary
 ## word definitions
 database: sqlite3
 
-database table: definitions
+database scheme:
 
-every column in table is text type.
+![database_scheme](./definitions/database_format.png)
 
-format of defintions table:
+script for build database: [click here](./definitions/createdefinitions.pyzc)
 
-	word | def1 | speech_part1 | def2 | speech_part2 
+	

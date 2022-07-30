@@ -8,10 +8,10 @@ DEPS=vwordle.html.mem vwordle.js vwordle.data
 SRCPATH=src
 INCPATH=inc
 
-SRC=main.cpp states.cpp sound.cpp
+SRC=main.cpp states.cpp sound.cpp definitions.cpp
 SRC:=$(addprefix $(SRCPATH)/, $(SRC))
 
-INC=global.hpp states.hpp sound.hpp
+INC=global.hpp states.hpp sound.hpp definitions.hpp
 INC:=$(addprefix $(INCPATH)/, $(INC))
 
 CXX=em++
