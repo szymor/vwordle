@@ -1,16 +1,15 @@
 #include "states.hpp"
 #include "global.hpp"
 #include "sound.hpp"
+#include "definitions.hpp"
 #include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <iterator>
-#include <sstream>
 #include <cctype>
 #include <map>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
-#include <sqlite3.h>
 
 #ifdef WEBOS
 #include <emscripten.h>
@@ -50,6 +49,7 @@ StateId stateid = SI_MENU;
 GameState gamestate;
 MenuState menustate;
 RulesState rulesstate;
+Definitions definitions;
 
 void State::processAll()
 {
@@ -156,47 +156,6 @@ void GameState::loadDictionary(int letternum)
 	std::cout << "Loaded " << dict.size() << " words." << std::endl;
 }
 
-static int sqlite3QuerySelectCallback(void* data, int argc, char** argv, char** azColName)
-{
-	fprintf(stderr, "%s: ", (const char*)data);
-
-	word_definition_first = argv[1];
-	speech_part_first = argv[2];
-	word_definition_second = argv[3];
-	speech_part_second = argv[4];
-	return 0;
-}
-void GameState::loadWinningWordDefinition()
-{
-	sqlite3* db;
-	int exit = 0;
-	exit = sqlite3_open("dict/def/definitions.db", &db);
-	std::string data("CALLBACK FUNCTION");
-	std::stringstream s;
-	std::string winning_word = word_to_guess;
-	std::transform(winning_word.begin(), winning_word.end(), winning_word.begin(), tolower);
-	s << "SELECT * FROM definitions where word=\"" << winning_word << "\";";
-	std::string sql(s.str());
-	if (exit)
-	{
-		std::cerr << "Error open DB " << sqlite3_errmsg(db) << std::endl;
-	}
-	else
-	{
-		std::cout << "Opened Database Successfully" << std::endl;
-	}
-
-	int rc = sqlite3_exec(db, sql.c_str(), sqlite3QuerySelectCallback, (void*)data.c_str(), NULL);
-	if (rc != SQLITE_OK)
-	{
-		std::cerr << "Error SELECT " << std::endl;
-	}
-	else
-	{
-		std::cout << "Operation OK!" << std::endl;
-	}
-	sqlite3_close(db);
-}
 
 void GameState::resetGame()
 {
@@ -221,11 +180,7 @@ void GameState::resetGame()
 	std::advance(it, steps);
 	word_to_guess = *it;
 	std::cout << "Word to guess: " << word_to_guess << std::endl;
-	loadWinningWordDefinition();
-	std::cout << "def1: " << word_definition_first << std::endl;
-	std::cout << "speech_part1: " << speech_part_first << std::endl;
-	std::cout << "def2: " << word_definition_second << std::endl;
-	std::cout << "speech_part2: " << speech_part_second << std::endl;
+	definitions.GetDefinitionsAndOthers(word_to_guess);
 }
 
 SDL_Surface *GameState::newColoredKeyboard()
@@ -356,11 +311,11 @@ void GameState::draw()
 		SDL_FreeSurface(text);
 
 		text = TTF_RenderUTF8_Blended(font, word_to_guess.c_str(), (SDL_Color){ 255, 255, 255 });
-		dst.x = 145 + (180 - text->w) / 2;
+		dst.x = 155 + (180 - text->w) / 2;
 		//dst.y += 17;
 		SDL_BlitSurface(text, NULL, screen, &dst);
 		SDL_FreeSurface(text);
-		if (word_definition_first != "None"  && speech_part_first != "None")
+		if (definitions.GetMaxDefinitionsNumber() != 0)
 		{
 			text = TTF_RenderUTF8_Blended(font, " Definition? Press A", (SDL_Color) { 255, 255, 255 });
 			dst.x = 90 + (180 - text->w) / 2;
@@ -371,109 +326,65 @@ void GameState::draw()
 	}
 	if (GS_DEFINITION == gamestatus)
 	{
-		dst.x = 0;
-		dst.y = 0;
-		SDL_BlitSurface(bg, NULL, screen, &dst);
-		SDL_Surface* text = nullptr;
-		std::string temp = "";
-		text = TTF_RenderUTF8_Blended(font_bold, "word", (SDL_Color) { 255, 255, 255 });
-		dst.x = (SCREEN_WIDTH - text->w) / 2;
-		dst.y += 20;
-		SDL_BlitSurface(text, NULL, screen, &dst);
-		SDL_FreeSurface(text);
-
-		text = TTF_RenderUTF8_Blended(font, word_to_guess.c_str(), (SDL_Color) { 255, 255, 255 });
-		dst.x = (SCREEN_WIDTH - text->w) / 2;
-		dst.y += 20;
-		SDL_BlitSurface(text, NULL, screen, &dst);
-		SDL_FreeSurface(text);
-		if (active_definition == 1)
+		if (definitions.GetMaxDefinitionsNumber() != 0)
 		{
-			if (word_definition_first != "None" && speech_part_first != "None")
+			dst.x = 0;
+			dst.y = 0;
+			SDL_BlitSurface(bg, NULL, screen, &dst);
+			SDL_Surface* text = nullptr;
+			std::string temp = "";
+			text = TTF_RenderUTF8_Blended(font_bold, "word", (SDL_Color) { 255, 255, 255 });
+			dst.x = (SCREEN_WIDTH - text->w) / 2;
+			dst.y += 20;
+			SDL_BlitSurface(text, NULL, screen, &dst);
+			SDL_FreeSurface(text);
+
+			text = TTF_RenderUTF8_Blended(font, word_to_guess.c_str(), (SDL_Color) { 255, 255, 255 });
+			dst.x = (SCREEN_WIDTH - text->w) / 2;
+			dst.y += 20;
+			SDL_BlitSurface(text, NULL, screen, &dst);
+			SDL_FreeSurface(text);
+
+			dst.x = 0;
+			std::string line = "";
+			for (auto temp : definitions.RenderTextWrap(definitions.GetCurrentDefinition(), 38))
 			{
-
-				text = TTF_RenderUTF8_Blended(font_bold, "definition", (SDL_Color) { 255, 255, 255 });
-				dst.x = (SCREEN_WIDTH - text->w) / 2;
+				line = temp;
+				text = TTF_RenderUTF8_Blended(font, line.c_str(), (SDL_Color) { 255, 255, 255 });
+				if (dst.x == 0)
+					dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
-				SDL_BlitSurface(text, NULL, screen, &dst);
-				SDL_FreeSurface(text);
-				for (auto ch : RenderTextWrap(word_definition_first, 45))
-				{
-					if (ch == '\n')
-					{
-						text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
-						dst.x = (SCREEN_WIDTH - text->w) / 2;
-						dst.y += 20;
-						SDL_BlitSurface(text, NULL, screen, &dst);
-						SDL_FreeSurface(text);
-						temp.clear();
-					}
-					else
-					{
-						temp.push_back(ch);
-					}
-				}
-				text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
-				dst.x = (SCREEN_WIDTH - text->w) / 2;
-				dst.y += 20;
-				temp.clear();
-				SDL_BlitSurface(text, NULL, screen, &dst);
-				SDL_FreeSurface(text);
-
-				text = TTF_RenderUTF8_Blended(font_bold, "speech part", (SDL_Color) { 255, 255, 255 });
-				dst.x = (SCREEN_WIDTH - text->w) / 2;
-				dst.y += 20;
-				SDL_BlitSurface(text, NULL, screen, &dst);
-				SDL_FreeSurface(text);
-
-				text = TTF_RenderUTF8_Blended(font, speech_part_first.c_str(), (SDL_Color) { 255, 255, 255 });
-				dst.x = 150;
-				dst.y += 20;
+				line.clear();
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
 			}
-		}
-		if(active_definition == 2)
-		{
-			if (word_definition_second != "None" && speech_part_second != "None")
+			text = TTF_RenderUTF8_Blended(font_bold, "speech part", (SDL_Color) { 255, 255, 255 });
+			dst.x = (SCREEN_WIDTH - text->w) / 2;
+			dst.y += 20;
+			SDL_BlitSurface(text, NULL, screen, &dst);
+			SDL_FreeSurface(text);
+
+			text = TTF_RenderUTF8_Blended(font, definitions.GetSpeechPartForWordDefinition().c_str(), (SDL_Color) { 255, 255, 255 });
+			dst.x = (SCREEN_WIDTH - text->w) / 2;
+			dst.y += 20;
+			SDL_BlitSurface(text, NULL, screen, &dst);
+			SDL_FreeSurface(text);
+	
+			text = TTF_RenderUTF8_Blended(font_bold, "synonyms", (SDL_Color) {255, 255, 255});
+			dst.x = (SCREEN_WIDTH - text->w) / 2;
+			dst.y += 20;
+			SDL_BlitSurface(text, NULL, screen, &dst);
+			SDL_FreeSurface(text);
+
+			dst.x = 0;
+			for (auto temp : definitions.RenderTextWrap(definitions.GetSynonymsForWordDefinition(), 38))
 			{
-				text = TTF_RenderUTF8_Blended(font_bold, "definition", (SDL_Color) { 255, 255, 255 });
-				dst.x = (SCREEN_WIDTH - text->w) / 2;
+				line = temp;
+				text = TTF_RenderUTF8_Blended(font, line.c_str(), (SDL_Color) { 255, 255, 255 });
+				if (dst.x == 0)
+					dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
-				SDL_BlitSurface(text, NULL, screen, &dst);
-				SDL_FreeSurface(text);
-				for (auto ch : RenderTextWrap(word_definition_second, 45))
-				{
-					if (ch == '\n')
-					{
-						text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
-						dst.x = (SCREEN_WIDTH - text->w) / 2;
-						dst.y += 20;
-						SDL_BlitSurface(text, NULL, screen, &dst);
-						SDL_FreeSurface(text);
-						temp.clear();
-					}
-					else
-					{
-						temp.push_back(ch);
-					}
-				}
-				text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
-				dst.x = (SCREEN_WIDTH - text->w) / 2;
-				dst.y += 20;
-				temp.clear();
-				SDL_BlitSurface(text, NULL, screen, &dst);
-				SDL_FreeSurface(text);
-
-				text = TTF_RenderUTF8_Blended(font_bold, "speech part", (SDL_Color) { 255, 255, 255 });
-				dst.x = (SCREEN_WIDTH - text->w) / 2;
-				dst.y += 20;
-				SDL_BlitSurface(text, NULL, screen, &dst);
-				SDL_FreeSurface(text);
-
-				text = TTF_RenderUTF8_Blended(font, speech_part_second.c_str(), (SDL_Color) { 255, 255, 255 });
-				dst.x = (SCREEN_WIDTH - text->w) / 2;
-				dst.y += 20;
+				line.clear();
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
 			}
@@ -729,31 +640,7 @@ void GameState::fillActiveLetterWithNextYellowCandidate()
 		letters[wrong_guesses][active_letter] = *it;
 	}
 }
-std::string GameState::RenderTextWrap(std::string str, int pos)
-{
-	std::istringstream words(str);
-	std::ostringstream wrapped;
-	std::string word;
-	if (words >> word)
-	{
-		wrapped << word;
-		size_t space_left = pos - word.length();
-		while (words >> word)
-		{
-			if (space_left < word.length() + 1)
-			{
-				wrapped << '\n' << word;
-				space_left = pos - word.length();
-			}
-			else
-			{
-				wrapped << ' ' << word;
-				space_left -= word.length() + 1;
-			}
-		}
-	}
-	return wrapped.str();
-}
+
 void GameState::processInput()
 {
 	SDL_Event event;
@@ -851,11 +738,8 @@ void GameState::processInput()
 						}
 						else if (gamestatus == GS_DEFINITION)
 						{
-							if (word_definition_second == "None" && active_definition == 1)
-							{
-								active_definition = 2;
-								gamestatus = GS_DEFINITION;
-							}
+							definitions.SetNextDefinition();
+							gamestatus = GS_DEFINITION;
 						}
 					} break;
 					case KEY_YELLOW:
@@ -866,11 +750,8 @@ void GameState::processInput()
 						}
 						else if (gamestatus == GS_DEFINITION)
 						{
-							if (word_definition_first == "None")
-							{
-								active_definition = 1;
-								gamestatus = GS_DEFINITION;
-							}
+							definitions.SetPreviousDefinition();
+							gamestatus = GS_DEFINITION;
 						}
 					} break;
 					case KEY_BLUE:
@@ -879,10 +760,10 @@ void GameState::processInput()
 						{
 							moveActiveLetterRight();
 						}
-						if (word_definition_first == "None")
+						if (GS_LOST == gamestatus)
 						{
-							active_definition = 1;
-							gamestatus = GS_DEFINITION;
+							if(definitions.GetMaxDefinitionsNumber() != 0)
+								gamestatus = GS_DEFINITION;
 						}
 					} break;
 					case KEY_BACK:
@@ -899,11 +780,8 @@ void GameState::processInput()
 						}
 						if (gamestatus == GS_DEFINITION)
 						{
-							if (word_definition_first != "None")
-							{
-								active_definition = 1;
-								gamestatus = GS_DEFINITION;
-							}
+							definitions.SetPreviousDefinition();
+							gamestatus = GS_DEFINITION;
 						}
 
 					} break;
@@ -916,11 +794,8 @@ void GameState::processInput()
 						}
 						if (gamestatus == GS_DEFINITION)
 						{
-							if (word_definition_second != "None" && active_definition == 1)
-							{
-								active_definition = 2;
-								gamestatus = GS_DEFINITION;
-							}
+							definitions.SetNextDefinition();
+							gamestatus = GS_DEFINITION;
 						}
 					} break;
 					case KEY_START:
@@ -959,9 +834,8 @@ void GameState::processInput()
 					{
 						if (GS_LOST == gamestatus)
 						{
-							if (word_definition_first != "None")
+							if (definitions.GetMaxDefinitionsNumber() != 0)
 							{
-								active_definition = 1;
 								gamestatus = GS_DEFINITION;
 							}
 						}

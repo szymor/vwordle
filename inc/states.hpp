@@ -66,7 +66,6 @@ private:
 	int word_size = 5;
 	int keyx = 0;
 	int keyy = 0;
-	int active_definition = 0;
 	std::string word_to_guess;
 	std::set<std::string> dict;
 	std::set<char> greens;
@@ -97,9 +96,7 @@ public:
 	void loadGfx();
 	void unloadGfx();
 	void loadDictionary(int letternum);
-	void loadWinningWordDefinition();
 	void resetGame();
-	std::string RenderTextWrap(std::string str, int pos);
 	virtual void draw();
 	virtual void processInput();
 };
