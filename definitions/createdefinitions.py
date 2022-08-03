@@ -6,7 +6,6 @@ def createTable():
     sql = """
         create table words(id integer primary key autoincrement, word text);
         create table synonyms(synonym_id integer primary key autoincrement,synonym text,word_id integer,foreign key(word_id) references words(id));
-        create table speech_part(speechpart_id integer not null primary key,speech_part text);
         create table definitions(definitions_id integer primary key autoincrement, definition text, word_id integer,speech_part_id integer,foreign key(word_id) references words(id),
         foreign key(speech_part_id) references speech_part(speechpart_id));
         insert into speech_part(speechpart_id,speech_part) values(1, 'verb');
@@ -40,8 +39,6 @@ def createDefinition(file):
                         speech_part_id = cur.fetchone()
                         cur.execute(f"select id from words where word='{word}'")
                         word_id = cur.fetchone()
-                        print(word_id)
-                        print("eror")
                         sql = f"insert into definitions(definition,word_id,speech_part_id) values('{meaning['def']}',{word_id[0]},{speech_part_id[0]});"
                         cur.execute(sql)
                         con.commit()
@@ -50,7 +47,7 @@ def createDefinition(file):
                                 cur.execute(f"insert into synonyms(synonym, word_id) values ('{synonym}', {word_id[0]})")
                                 con.commit()
                 except:
-                    print("error")
+                    pass
                 con.commit()
         con.close()
                 

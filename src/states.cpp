@@ -334,21 +334,10 @@ void GameState::draw()
 			dst.x = 0;
 			dst.y = 0;
 			SDL_BlitSurface(bg, NULL, screen, &dst);
-			dst.y = 25;
-			if (definitions.GetCurrentDefinitionId() > 0)
-			{
-				dst.x = 5;
-				SDL_BlitSurface(arrow_back, NULL, screen, &dst);
-				 
-			}
-			if (definitions.GetCurrentDefinitionId() < definitions.GetMaxDefinitionsNumber() - 1)
-			{
-				dst.x = (SCREEN_WIDTH - arrow_next->w);
-				SDL_BlitSurface(arrow_next, NULL, screen, &dst);
-			}
 			SDL_Surface* text = nullptr;
 			text = TTF_RenderUTF8_Blended(font_bold, "word", (SDL_Color) { 255, 255, 255 });
 			dst.x = (SCREEN_WIDTH - text->w) / 2;
+			dst.y = 10;
 			SDL_BlitSurface(text, NULL, screen, &dst);
 			SDL_FreeSurface(text);
 
@@ -400,6 +389,19 @@ void GameState::draw()
 				line.clear();
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
+			}
+
+			dst.y = (SCREEN_HEIGHT - arrow_back->h-3);
+			if (definitions.GetCurrentDefinitionId() > 0)
+			{
+				dst.x = 5;
+				SDL_BlitSurface(arrow_back, NULL, screen, &dst);
+
+			}
+			if (definitions.GetCurrentDefinitionId() < definitions.GetMaxDefinitionsNumber() - 1)
+			{
+				dst.x = (SCREEN_WIDTH - arrow_next->w);
+				SDL_BlitSurface(arrow_next, NULL, screen, &dst);
 			}
 		}
 	}
