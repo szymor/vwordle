@@ -59,6 +59,8 @@ private:
 	SDL_Surface *check_select = nullptr;
 	SDL_Surface *keyboard_bg = nullptr;
 	SDL_Surface *keyboard_fg = nullptr;
+	SDL_Surface *arrow_next = nullptr;
+	SDL_Surface* arrow_back = nullptr;
 	char letters[MAX_WRONG_GUESSES][MAX_WORD_SIZE];
 	BoxType bts[MAX_WRONG_GUESSES][MAX_WORD_SIZE];
 	int wrong_guesses = 0;

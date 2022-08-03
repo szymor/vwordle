@@ -97,6 +97,8 @@ void GameState::drawBox(int x, int y, BoxType bt)
 void GameState::loadGfx()
 {
 	bg = IMG_Load(GFX_PATH "bg.png");
+	arrow_next = IMG_Load(GFX_PATH "arrow_next.png");
+	arrow_back = IMG_Load(GFX_PATH "arrow_back.png");
 	gfx = IMG_Load(GFX_PATH "gfx.png");
 	unknown_word_dialog = IMG_Load(GFX_PATH "unknownword.png");
 	win_dialog = IMG_Load(GFX_PATH "won.png");
@@ -129,6 +131,10 @@ void GameState::unloadGfx()
 	letter_select = nullptr;
 	SDL_FreeSurface(check_select);
 	check_select = nullptr;
+	SDL_FreeSurface(arrow_next);
+	arrow_next = nullptr;
+	SDL_FreeSurface(arrow_back);
+	arrow_back = nullptr;
 	TTF_CloseFont(font);
 	font = nullptr;
 	TTF_CloseFont(font_bold);
@@ -271,7 +277,6 @@ void GameState::draw()
 	}
 	else if (GS_WON == gamestatus)
 	{
-		/*
 		dst.x = 0;
 		dst.y = 25;
 		SDL_BlitSurface(win_dialog, NULL, screen, &dst);
@@ -289,8 +294,6 @@ void GameState::draw()
 		dst.y += 92;
 		SDL_BlitSurface(text, NULL, screen, &dst);
 		SDL_FreeSurface(text);
-		*/
-		gamestatus = GS_LOST;
 	}
 	else if (GS_LOST == gamestatus)
 	{
@@ -331,11 +334,21 @@ void GameState::draw()
 			dst.x = 0;
 			dst.y = 0;
 			SDL_BlitSurface(bg, NULL, screen, &dst);
+			dst.y = 25;
+			if (definitions.GetCurrentDefinitionId() > 0)
+			{
+				dst.x = 5;
+				SDL_BlitSurface(arrow_back, NULL, screen, &dst);
+				 
+			}
+			if (definitions.GetCurrentDefinitionId() < definitions.GetMaxDefinitionsNumber() - 1)
+			{
+				dst.x = (SCREEN_WIDTH - arrow_next->w);
+				SDL_BlitSurface(arrow_next, NULL, screen, &dst);
+			}
 			SDL_Surface* text = nullptr;
-			std::string temp = "";
 			text = TTF_RenderUTF8_Blended(font_bold, "word", (SDL_Color) { 255, 255, 255 });
 			dst.x = (SCREEN_WIDTH - text->w) / 2;
-			dst.y += 20;
 			SDL_BlitSurface(text, NULL, screen, &dst);
 			SDL_FreeSurface(text);
 

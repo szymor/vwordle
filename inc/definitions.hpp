@@ -19,7 +19,7 @@ public:
 	std::string GetSpeechPartForWordDefinition();
 	std::string GetSynonymsForWordDefinition();
 	std::string GetCurrentDefinition();
-	int getCurrentDefinitionId();
+	int GetCurrentDefinitionId();
 	void GetDefinitionsAndOthers(std::string word);
 	void SetNextDefinition();
 	void SetPreviousDefinition();

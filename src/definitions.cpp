@@ -96,7 +96,7 @@ std::string Definitions::GetCurrentDefinition()
 }
 
 
-int Definitions::getCurrentDefinitionId()
+int Definitions::GetCurrentDefinitionId()
 {
 	return current_definition;
 }
