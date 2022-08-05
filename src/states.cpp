@@ -41,10 +41,6 @@ static constexpr char keys[KBRD_ROWS][KBRD_COLS] = {
 	{ 'Z', 'X', 'C', 'V', 'B', 'N', 'M',   0,   0,  0 }
 };
 
-std::string word_definition_first = "None";
-std::string speech_part_first = "None";
-std::string word_definition_second = "None";
-std::string speech_part_second = "None";
 StateId stateid = SI_MENU;
 GameState gamestate;
 MenuState menustate;
@@ -301,23 +297,18 @@ void GameState::draw()
 		dst.y = 25;
 		SDL_BlitSurface(lose_dialog, NULL, screen, &dst);
 
-		SDL_Surface *text = TTF_RenderUTF8_Blended(font, "Not this time...", (SDL_Color){ 255, 255, 255 });
+		SDL_Surface* text = TTF_RenderUTF8_Blended(font, "Not this time...", (SDL_Color) { 255, 255, 255 });
 		dst.x = 104 + (180 - text->w) / 2;
-		dst.y += 92-17;
+		dst.y += 92 - 17;
 		SDL_BlitSurface(text, NULL, screen, &dst);
 		SDL_FreeSurface(text);
-
-		text = TTF_RenderUTF8_Blended(font, "The answer is", (SDL_Color){ 255, 255, 255 });
-		dst.x = 77 + (180 - text->w) / 2;
+		std::string temp = "The answer is " + word_to_guess;
+		text = TTF_RenderUTF8_Blended(font, temp.c_str(), (SDL_Color) { 255, 255, 255 });
+		dst.x = 104 + (180 - text->w) / 2;
 		dst.y += 17;
 		SDL_BlitSurface(text, NULL, screen, &dst);
 		SDL_FreeSurface(text);
-
-		text = TTF_RenderUTF8_Blended(font, word_to_guess.c_str(), (SDL_Color){ 255, 255, 255 });
-		dst.x = 155 + (180 - text->w) / 2;
-		//dst.y += 17;
-		SDL_BlitSurface(text, NULL, screen, &dst);
-		SDL_FreeSurface(text);
+		temp.clear();
 		if (definitions.GetMaxDefinitionsNumber() != 0)
 		{
 			text = TTF_RenderUTF8_Blended(font, " Definition? Press A", (SDL_Color) { 255, 255, 255 });
@@ -360,37 +351,45 @@ void GameState::draw()
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
 			}
-			text = TTF_RenderUTF8_Blended(font_bold, "speech part", (SDL_Color) { 255, 255, 255 });
-			dst.x = (SCREEN_WIDTH - text->w) / 2;
-			dst.y += 20;
-			SDL_BlitSurface(text, NULL, screen, &dst);
-			SDL_FreeSurface(text);
-
-			text = TTF_RenderUTF8_Blended(font, definitions.GetSpeechPartForWordDefinition().c_str(), (SDL_Color) { 255, 255, 255 });
-			dst.x = (SCREEN_WIDTH - text->w) / 2;
-			dst.y += 20;
-			SDL_BlitSurface(text, NULL, screen, &dst);
-			SDL_FreeSurface(text);
-	
-			text = TTF_RenderUTF8_Blended(font_bold, "synonyms", (SDL_Color) {255, 255, 255});
-			dst.x = (SCREEN_WIDTH - text->w) / 2;
-			dst.y += 20;
-			SDL_BlitSurface(text, NULL, screen, &dst);
-			SDL_FreeSurface(text);
-
-			dst.x = 0;
-			for (auto temp : definitions.RenderTextWrap(definitions.GetSynonymsForWordDefinition(), 38))
+			if (definitions.GetSpeechPartForWordDefinition() != "")
 			{
-				line = temp;
-				text = TTF_RenderUTF8_Blended(font, line.c_str(), (SDL_Color) { 255, 255, 255 });
-				if (dst.x == 0)
-					dst.x = (SCREEN_WIDTH - text->w) / 2;
+
+				text = TTF_RenderUTF8_Blended(font_bold, "speech part", (SDL_Color) { 255, 255, 255 });
+				dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
-				line.clear();
+				SDL_BlitSurface(text, NULL, screen, &dst);
+				SDL_FreeSurface(text);
+
+				text = TTF_RenderUTF8_Blended(font, definitions.GetSpeechPartForWordDefinition().c_str(), (SDL_Color) { 255, 255, 255 });
+				dst.x = (SCREEN_WIDTH - text->w) / 2;
+				dst.y += 20;
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
 			}
+			if (definitions.GetSynonymsForWordDefinition() != "")
+			{
+				text = TTF_RenderUTF8_Blended(font_bold, "synonyms", (SDL_Color) { 255, 255, 255 });
+				if (dst.y <= SCREEN_HEIGHT - 50)
+				{
+					dst.x = (SCREEN_WIDTH - text->w) / 2;
+					dst.y += 20;
+					SDL_BlitSurface(text, NULL, screen, &dst);
+					SDL_FreeSurface(text);
 
+					dst.x = 0;
+					for (auto temp : definitions.RenderTextWrap(definitions.GetSynonymsForWordDefinition(), 38))
+					{
+						line = temp;
+						text = TTF_RenderUTF8_Blended(font, line.c_str(), (SDL_Color) { 255, 255, 255 });
+						if (dst.x == 0)
+							dst.x = (SCREEN_WIDTH - text->w) / 2;
+						dst.y += 20;
+						line.clear();
+						SDL_BlitSurface(text, NULL, screen, &dst);
+						SDL_FreeSurface(text);
+					}
+				}
+			}
 			dst.y = (SCREEN_HEIGHT - arrow_back->h-3);
 			if (definitions.GetCurrentDefinitionId() > 0)
 			{
@@ -684,6 +683,10 @@ void GameState::processInput()
 						{
 							moveKeyboardPointerLeft();
 						}
+						else if (gamestatus == GS_DEFINITION)
+						{
+							definitions.SetPreviousDefinition();
+						}
 					} break;
 					case SDLK_RIGHT:
 					{
@@ -694,6 +697,10 @@ void GameState::processInput()
 						else if (GS_VIRTUAL_KEYBOARD == gamestatus)
 						{
 							moveKeyboardPointerRight();
+						}
+						else if (gamestatus == GS_DEFINITION)
+						{
+							definitions.SetNextDefinition();
 						}
 					} break;
 					case SDLK_UP:
@@ -754,7 +761,6 @@ void GameState::processInput()
 						else if (gamestatus == GS_DEFINITION)
 						{
 							definitions.SetNextDefinition();
-							gamestatus = GS_DEFINITION;
 						}
 					} break;
 					case KEY_YELLOW:
@@ -766,7 +772,6 @@ void GameState::processInput()
 						else if (gamestatus == GS_DEFINITION)
 						{
 							definitions.SetPreviousDefinition();
-							gamestatus = GS_DEFINITION;
 						}
 					} break;
 					case KEY_BLUE:
@@ -775,7 +780,7 @@ void GameState::processInput()
 						{
 							moveActiveLetterRight();
 						}
-						if (GS_LOST == gamestatus)
+						else if (GS_LOST == gamestatus)
 						{
 							if(definitions.GetMaxDefinitionsNumber() != 0)
 								gamestatus = GS_DEFINITION;
@@ -793,10 +798,9 @@ void GameState::processInput()
 						{
 							moveActiveLetterLeft();
 						}
-						if (gamestatus == GS_DEFINITION)
+						else if (gamestatus == GS_DEFINITION)
 						{
 							definitions.SetPreviousDefinition();
-							gamestatus = GS_DEFINITION;
 						}
 
 					} break;
@@ -807,10 +811,9 @@ void GameState::processInput()
 						{
 							moveActiveLetterRight();
 						}
-						if (gamestatus == GS_DEFINITION)
+						else if (gamestatus == GS_DEFINITION)
 						{
 							definitions.SetNextDefinition();
-							gamestatus = GS_DEFINITION;
 						}
 					} break;
 					case KEY_START:

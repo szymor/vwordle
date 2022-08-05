@@ -9,6 +9,7 @@ private:
 	std::vector<std::string> definitions;
 	std::vector<std::string> speech_parts;
 	std::vector<std::string> synonyms;
+	std::string winning_word;
 	int max_definitions;
 	int current_definition = 0;
 	void clearStores();
