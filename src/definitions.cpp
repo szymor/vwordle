@@ -44,7 +44,6 @@ std::vector<std::string> Definitions::RenderTextWrap(std::string str, int pos)
 
 void Definitions::clearStores()
 {
-	definitions.empty();
 	definitions.clear();
 	speech_parts.clear();
 	synonyms.clear();
@@ -61,29 +60,18 @@ std::string Definitions::GetSpeechPartForWordDefinition()
 	{
 		return speech_parts.at(current_definition);
 	}
-	return " ";
+	return "";
 }
 
 std::string Definitions::GetSynonymsForWordDefinition()
 {
 	std::stringstream temp;
 	if (!synonyms.empty())
-	{ 
-		int i = 0;
-		for (auto synonym : synonyms)
-		{
-			if (i == 5)
-				break;
-			if(synonym != "")
-				temp << synonym << ", ";
-			i++;
-		}
-		std::string result = temp.str();
-		result.pop_back();
-		result.pop_back();
-		return result;
+	{
+		if (synonyms.at(current_definition) != winning_word)
+			return synonyms.at(current_definition);
 	}
-	return " ";
+	return "";
 }
 
 std::string Definitions::GetCurrentDefinition()
@@ -92,7 +80,7 @@ std::string Definitions::GetCurrentDefinition()
 	{
 		return definitions.at(current_definition);
 	}
-	return " ";
+	return "";
 }
 
 
@@ -102,20 +90,35 @@ int Definitions::GetCurrentDefinitionId()
 }
 static int sqlite3QuerySelectCallback(void* data, int argc, char** argv, char** azColName)
 {
-	for (int i = 0; i < argc; i++)
+	const char *option = (const char*)data;
+	if (strcmp(option, "def") == 0)
 	{
-		if (strcmp(azColName[i], "definition") == 0)
+		for (int i = 0; i < argc; i++)
 		{
-			definitions_temp.push_back(argv[i]);
+			if (strcmp(azColName[i], "definition") == 0)
+			{
+				definitions_temp.push_back(argv[i]);
+			}
+			if (strcmp(azColName[i], "speech_part") == 0)
+			{
+				speech_parts_temp.push_back(argv[i]);
+			}
 		}
-		if (strcmp(azColName[i], "speech_part") == 0)
+	}
+	else if (strcmp(option, "syn") == 0)
+	{
+		std::stringstream temp;
+		for (int i = 0; i < argc; i++)
 		{
-			speech_parts_temp.push_back(argv[i]);
+			if (strcmp(azColName[i], "word") == 0)
+			{
+				temp << argv[i] << ", ";
+			}
 		}
-		if (strcmp(azColName[i], "synonym") == 0)
-		{
-			synonyms_temp.push_back(argv[i]);
-		}
+		std::string result(temp.str());
+		result.pop_back();
+		result.pop_back();
+		synonyms_temp.push_back(result);
 	}
 	return 0;
 }
@@ -125,14 +128,13 @@ void Definitions::GetDefinitionsAndOthers(std::string word)
 	sqlite3* db;
 	int exit = 0;
 	exit = sqlite3_open(database_name.c_str(), &db);
-	std::string data("CALLBACK FUNCTION");
-	std::string winning_word = word;
+	std::string option = "def";
 	std::stringstream s;
+	winning_word = word;
 	std::transform(winning_word.begin(), winning_word.end(), winning_word.begin(), tolower);
-	s << "SELECT definitions.definition, speech_part.speech_part, synonyms.synonym FROM \
+	s << "SELECT definitions.definition, speech_part.speech_part FROM \
 	definitions inner join speech_part on definitions.speech_part_id=speech_part.speechpart_id \
-	inner join words on definitions.word_id=words.id inner join synonyms on definitions.definitions_id= \
-	synonyms.synonym_id where words.word='" << winning_word << "'";
+	inner join words on definitions.word_id=words.id where words.word='" << winning_word << "'";
 	if (exit)
 	{
 		std::cerr << "Error open DB " << sqlite3_errmsg(db) << std::endl;
@@ -141,22 +143,33 @@ void Definitions::GetDefinitionsAndOthers(std::string word)
 	{
 		std::cout << "Opened Database Successfully" << std::endl;
 	}
-	int rc = sqlite3_exec(db, s.str().c_str(), sqlite3QuerySelectCallback, (void*)data.c_str(), NULL);
+	int rc = sqlite3_exec(db, s.str().c_str(), sqlite3QuerySelectCallback, (void*)option.c_str(), NULL);
 	s.clear();
 	if (rc != SQLITE_OK)
 	{
-		std::cerr << "Error SELECT " << std::endl;
+		std::cerr << "Error SELECT definitions " << std::endl;
 	}
 	else
 	{
-		std::cout << "Operation OK!" << std::endl;
+		option = "syn";
 		clearStores();
 		std::copy(definitions_temp.begin(), definitions_temp.end(), std::back_inserter(definitions));
 		std::copy(speech_parts_temp.begin(), speech_parts_temp.end(), std::back_inserter(speech_parts));
-		std::copy(synonyms_temp.begin(), synonyms_temp.end(), std::back_inserter(synonyms));
 		definitions_temp.clear();
 		speech_parts_temp.clear();
-		synonyms_temp.clear();
+		for (auto def : definitions)
+		{
+			std::string sql = "select words.word from definitions inner join words on definitions.word_id=words.id where definition='" + def + "'";
+			rc = sqlite3_exec(db, sql.c_str(), sqlite3QuerySelectCallback, (void*)option.c_str(), NULL);
+		}
+		if (rc != SQLITE_OK)
+			std::cerr << "Error SELECT synonyms " << std::endl;
+		else
+		{
+			std::cout << "Operation OK!" << std::endl;
+			std::copy(synonyms_temp.begin(), synonyms_temp.end(), std::back_inserter(synonyms));
+			synonyms_temp.clear();
+		}
 	}
 	max_definitions = definitions.size();
 	current_definition = 0; 

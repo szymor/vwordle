@@ -36,6 +36,13 @@ The word definitions are from wordset-dictionary founded by Hampton Lintorn Catl
 https://github.com/wordset/wordset-dictionary
 
 ## word definitions
+
+definition controls:
+
+left arrow/L1 - switch to previous definition
+
+right arrow/R1 - switch to next definition
+
 database: sqlite3
 
 database scheme:
