@@ -344,8 +344,7 @@ void GameState::draw()
 			{
 				line = temp;
 				text = TTF_RenderUTF8_Blended(font, line.c_str(), (SDL_Color) { 255, 255, 255 });
-				if (dst.x == 0)
-					dst.x = (SCREEN_WIDTH - text->w) / 2;
+				dst.x = (SCREEN_WIDTH - text->w) / 2;
 				dst.y += 20;
 				line.clear();
 				SDL_BlitSurface(text, NULL, screen, &dst);
@@ -366,7 +365,7 @@ void GameState::draw()
 				SDL_BlitSurface(text, NULL, screen, &dst);
 				SDL_FreeSurface(text);
 			}
-			if (definitions.GetSynonymsForWordDefinition() != "")
+			if (definitions.GetSynonymsForWordDefinition() != " " && !definitions.GetSynonymsForWordDefinition().empty())
 			{
 				text = TTF_RenderUTF8_Blended(font_bold, "synonyms", (SDL_Color) { 255, 255, 255 });
 				if (dst.y <= SCREEN_HEIGHT - 50)

@@ -13,7 +13,7 @@ private:
 	int max_definitions;
 	int current_definition = 0;
 	void clearStores();
-	
+	std::string GetSynonyms(std::string definition);
 
 public:
 	int GetMaxDefinitionsNumber();
