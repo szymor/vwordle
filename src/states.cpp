@@ -311,8 +311,8 @@ void GameState::draw()
 		temp.clear();
 		if (definitions.GetMaxDefinitionsNumber() != 0)
 		{
-			text = TTF_RenderUTF8_Blended(font, " Definition? Press A", (SDL_Color) { 255, 255, 255 });
-			dst.x = 90 + (180 - text->w) / 2;
+			text = TTF_RenderUTF8_Blended(font, "Definition? Press A", (SDL_Color) { 255, 255, 255 });
+			dst.x = 104 + (180 - text->w) / 2;
 			dst.y += 17;
 			SDL_BlitSurface(text, NULL, screen, &dst);
 			SDL_FreeSurface(text);
