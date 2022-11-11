@@ -11,7 +11,7 @@ INC:=$(addprefix $(INCPATH)/, $(INC))
 CXX=mipsel-linux-g++
 PKGCONF=$(shell $(CXX) --print-sysroot)/../../bin/pkg-config
 CFLAGS=$(shell $(PKGCONF) --cflags sdl SDL_image SDL_mixer SDL_ttf) -I$(INCPATH) -Ofast -DRETROFW
-LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image SDL_mixer SDL_ttf)
+LFLAGS=$(shell $(PKGCONF) --libs sdl SDL_image SDL_mixer SDL_ttf) $(shell $(CXX) --print-sysroot)/usr/lib/libsqlite3.a
 
 all: $(OPK)
 
