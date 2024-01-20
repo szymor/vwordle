@@ -20,6 +20,36 @@ At the moment the game has been ported to the following platforms:
 - [MiyooCFW] background music plays once and then stops playing.
 - [LG webOS TV 4.0/5.0] visual flickering and instability. The game works fine on webOS TV 6.0 and 22.
 
+## dictionary
+The dictionary with word definitions is stored as a SQLite 3 database file. The entity relationship diagram of the database is as follows:
+
+```mermaid
+erDiagram
+    definitions }|--|| words : describes
+    definitions }|--|| speech_part : "used as"
+
+    definitions {
+        integer definitions_id
+        text definition
+        integer word_id
+        integer speech_part_id
+    }
+
+    words {
+        integer id
+        text word
+    }
+
+    speech_part {
+        integer speechpart_id
+        text speech_part
+    }
+```
+
+Script for building the database is [here](./definitions/createdefinitions.py).
+
+Many thanks to a0w-svg for implementing this feature!
+
 ## license
 The source code of the game is licensed under GNU GPL 3.0 by vamastah.
 
@@ -34,21 +64,3 @@ https://freesound.org/
 
 The word definitions are from wordset-dictionary founded by Hampton Lintorn Catlin and Michael Lintorn Catlin.
 https://github.com/wordset/wordset-dictionary
-
-## word definitions
-
-definition controls:
-
-left arrow/L1 - switch to previous definition
-
-right arrow/R1 - switch to next definition
-
-database: sqlite3
-
-database scheme:
-
-![database_scheme](./definitions/database_format.png)
-
-script for build database: [click here](./definitions/createdefinitions.pyzc)
-
-	
